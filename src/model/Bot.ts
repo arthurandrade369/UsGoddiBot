@@ -1,0 +1,52 @@
+import '../utils/module-alias';
+import { Collection, Client, ActivityType, Message } from 'discord.js';
+import type { iCommand } from '@src/interfaces/iCommand';
+import config from '@src/utils/config';
+import { MappingDirectories } from '@src/utils/mappingDirectories';
+import { CommandsProvider } from '@src/providers/commandsProvider';
+
+export class Bot {
+    public commands = new Collection<string, iCommand>();
+    public cooldown = new Collection<string, Collection<string, number>>;
+
+    public constructor(public readonly client: Client) {
+        this.client.login(config.general.TOKEN);
+
+        this.client.on('ready', () => {
+            console.log(`${this.client.user?.username} ready!`);
+            client.user?.setActivity(`${config.general.TRIGGER}help`, { type: ActivityType.Listening });
+        });
+
+        this.client.on('error', console.error);
+        this.client.on('warn', (info) => console.log(info));
+
+        this.importCommands();
+        this.onMessage();
+    }
+
+    private async importCommands(): Promise<void> {
+        type CommandImport = typeof import('@src/commands/help');
+        const path = MappingDirectories.pathResolve('src/commands');
+        const commandFiles = MappingDirectories.filesResolve(path);
+
+        for (const file of commandFiles) {
+            const command: CommandImport = await import(MappingDirectories.pathResolve(path, file));
+            this.commands.set(command.default.name, command.default);
+        }
+    }
+
+    private async onMessage(): Promise<void> {
+        this.client.on('messageCreate', async (message: Message) => {
+            if (message.author.bot) {
+                return;
+            }
+            const content = CommandsProvider.separateTrigger(message.content);
+            if (!content) return;
+
+            const command = this.commands.get(content.command) ?? this.commands.find((cmd) => cmd.aliases?.includes(content.command));
+            if (!command) return;
+
+            await command.execute(message, content.args);
+        })
+    }
+}

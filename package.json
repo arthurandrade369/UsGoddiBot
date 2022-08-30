@@ -1,0 +1,36 @@
+{
+  "author": "Arthur Andrade",
+  "license": "MIT",
+  "name": "usgoddi",
+  "version": "1.0.0",
+  "description": "A general bot for my group channel in dicord",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:start": "yarn build && node dist/index.js",
+    "lint": "eslint ./src --ext .ts",
+    "lint:fix": "eslint ./src --ext .ts --fix",
+    "dev": "tsnd --transpile-only --clear --inspect -- src/index.ts"
+  },
+  "devDependencies": {
+    "@types/module-alias": "^2.0.1",
+    "@types/node": "^18.6.2",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.31.0",
+    "eslint": "^8.20.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "discord.js": "^14.1.2",
+    "dotenv": "^16.0.1",
+    "module-alias": "^2.2.2"
+  },
+  "keywords": [
+    "nodejs",
+    "discord",
+    "bot",
+    "discordbot",
+    "typescript"
+  ]
+}
