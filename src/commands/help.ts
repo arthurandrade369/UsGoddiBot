@@ -8,21 +8,32 @@ import { CommandsProvider } from '@src/providers/commandsProvider';
 const help: iCommand = {
     name: 'help',
     description: `Mostra comandos e descrições.`,
+    detailedDescription: 'Mostra todos os comandos disponiveis ou uma descrição mais detalhada de um comando específico',
     aliases: ['h'],
+    permission: ['everyone'],
     cooldown: undefined,
-    async execute(message: Message): Promise<void> {
-        const embed = CommandsProvider.getEmbed();
-        embed.setTitle('Comandos');
-        embed.setDescription('Lista de comandos disponíveis')
+    async execute(message: Message, args: string[]): Promise<void> {
 
-        bot.commands.forEach((command) => {
-            embed.addFields({
-                name: `**${command.name}:**`,
-                value: `*${command.description}*`,
+        if (!args.length) {
+            const embed = CommandsProvider.getEmbed('Comandos', 'Lista de comandos disponíveis');
+            bot.commands.forEach((command) => {
+                embed.addFields({
+                    name: `**${command.name}:**`,
+                    value: `*${command.description}*`,
+                });
             });
-        });
 
-        await message.reply({ embeds: [embed] }).catch(console.error);
+            await message.reply({ embeds: [embed] }).catch(console.error);
+        } else {
+            const command = bot.commands.get(args[0]) ?? bot.commands.find(cmd => cmd.aliases.includes(args[0]))
+            if (!command) return;
+
+            const embed = CommandsProvider.getEmbed(command.name, command.detailedDescription);
+
+            if (command.args) embed.addFields({name: `**${command.detailedDescription}**`,value: `*${command.args}*`});
+
+            await message.reply({ embeds: [embed] }).catch(console.error);
+        }
     }
 }
 

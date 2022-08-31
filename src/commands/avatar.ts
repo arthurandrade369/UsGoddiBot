@@ -6,7 +6,9 @@ import { CommandsProvider } from '@src/providers/commandsProvider';
 const avatar: iCommand = {
     name: 'avatar',
     description: `Envia o avatar do usario marcado. Exemplo: \`!avatar @user\``,
+    detailedDescription: 'Envia o avatar do usuario marcado',
     aliases: [],
+    permission: [],
     cooldown: 3,
     async execute(message: Message, args: string[]): Promise<void> {
         if (!args.length) message.reply('❌  **|  É necessário passar um usuário como target**');
@@ -19,18 +21,10 @@ const avatar: iCommand = {
 
         const avatar = members.map((member) => {
             if (!member) return;
-            return {
-                id: member.id,
-                avatar: member.user.avatar
-            };
+            return member.user.avatarURL()
         })
 
-        const imageLink = avatar.map((user) => {
-            if (!user) return;
-            return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}`;
-        })
-
-        imageLink.forEach((image) => {
+        avatar.forEach((image) => {
             if (!image) return;
             message.channel.send(image)
         });

@@ -3,16 +3,17 @@ import { Message } from "discord.js";
 
 const clean: iCommand = {
     name: 'clear',
-    description: 'Limpa o canal de texto por completo. **⚠  IRÁ  APAGAR  TUDO** ',
+    description: 'Apaga todas as mensagens desde a chegada do bot **⚠  IRÁ  APAGAR  TUDO** ',
+    detailedDescription: 'Apaga todas as mensagens, sem filtro, desde que o bot entrou no servidor',
     aliases: [],
+    permission: ['administrator'],
     cooldown: undefined,
     async execute(message: Message): Promise<void> {
         const channel = message.channel;
-
-        const messages = channel.awaitMessages();
-        await Promise.all([messages, messages.then(messages => messages.forEach(message => message.delete()))]);
-
-        console.log('ok');
+        const messages = channel.messages.cache;
+        messages.forEach(message => {
+            message.delete();
+        })
     },
 }
 
