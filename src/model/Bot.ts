@@ -11,10 +11,11 @@ export class Bot {
 
     public constructor(public readonly client: Client) {
         this.client.login(config.general.TOKEN);
+        this.client.user?.setAvatar('http://pm1.narvii.com/7613/ab57b8bb348c4c57901780afc219620136fbe953r1-346-346v2_00.jpg');
 
         this.client.on('ready', () => {
             console.log(`${this.client.user?.username} ready!`);
-            client.user?.setActivity(`${config.general.TRIGGER}help`, { type: ActivityType.Listening });
+            this.client.user?.setActivity(`${config.general.TRIGGER}help`, { type: ActivityType.Listening });
         });
 
         this.client.on('error', console.error);

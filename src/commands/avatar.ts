@@ -7,6 +7,7 @@ const avatar: iCommand = {
     name: 'avatar',
     description: `Envia o avatar do usario marcado. Exemplo: \`!avatar @user\``,
     detailedDescription: 'Envia o avatar do usuario marcado',
+    args: '',
     aliases: [],
     permission: [],
     cooldown: 3,
@@ -26,7 +27,7 @@ const avatar: iCommand = {
 
         avatar.forEach((image) => {
             if (!image) return;
-            message.channel.send(image)
+            message.reply(image)
         });
     }
 }

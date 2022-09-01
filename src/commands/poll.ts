@@ -14,11 +14,15 @@ const poll: iCommand = {
             message.reply('❌  **|  É necessário passar argumentos para a votação**');
             return;
         }
+        if (args.length < 2) {
+            message.reply('❌  **|  Tem que passar dois argumentos pra ser uma votação ze buceta**');
+            return;
+        }
         if (args.length > 9) {
             message.reply('❌  **|  Apenas 10 itens por votação **');
             return;
         }
-        
+
         CommandsProvider.createPoll(message, args);
     },
 }

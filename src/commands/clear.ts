@@ -6,7 +6,7 @@ const clean: iCommand = {
     description: 'Apaga todas as mensagens desde a chegada do bot **⚠  IRÁ  APAGAR  TUDO** ',
     detailedDescription: 'Apaga todas as mensagens, sem filtro, desde que o bot entrou no servidor',
     aliases: [],
-    permission: ['administrator'],
+    permission: ['ADMINISTRADOR'],
     cooldown: undefined,
     async execute(message: Message): Promise<void> {
         const channel = message.channel;

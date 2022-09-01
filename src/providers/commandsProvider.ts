@@ -1,11 +1,11 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Guild, GuildMember, InteractionCollector, Message } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Guild, GuildMember, InteractionCollector, Message, ReplyMessageOptions } from 'discord.js';
 import config from '@src/utils/config';
 import { iSeparatorReturn } from '@src/interfaces/iSeparatorReturn';
 import { bot } from '@src/index';
-
-
+import { iEmbedReturn } from '@src/interfaces/iEmbedReturn';
 
 export class CommandsProvider {
+
     /**
      * Separate the command itself of the trigger
      * 
@@ -31,7 +31,7 @@ export class CommandsProvider {
      * @param description 
      * @returns EmbedBuilder
      */
-    static getEmbed(title: string, description?: string): EmbedBuilder {
+    static getEmbed(message: Message, title: string, description?: string): EmbedBuilder {
         const embed = new EmbedBuilder()
             .setColor('DarkBlue');
 
@@ -41,8 +41,9 @@ export class CommandsProvider {
             url: config.general.INVITE_LINK
         });
 
-        embed.setThumbnail('https://pbs.twimg.com/profile_images/1215734764323377152/-hmYx6ee_400x400.jpg');
+        // embed.setThumbnail('https://pbs.twimg.com/profile_images/1215734764323377152/-hmYx6ee_400x400.jpg');
         embed.setTitle(title);
+        embed.setFooter({ text: `Requested by : ${message.author.username}#${message.author.discriminator}`, iconURL: `${message.author.avatarURL()}` });
         if (description) embed.setDescription(description);
 
         return embed;
@@ -93,8 +94,8 @@ export class CommandsProvider {
      * @param message 
      * @param args 
      */
-    static async createPoll(message: Message, args: string[]): Promise<void> {
-        const embed = CommandsProvider.getEmbed('Votação iniciada', 'Clique para votar');
+    static createPoll(message: Message, args: string[]): iEmbedReturn {
+        const embed = CommandsProvider.getEmbed(message, 'Votação iniciada', 'Clique para votar');
         const row = new ActionRowBuilder<ButtonBuilder>();
 
         args.forEach((option) => {
@@ -102,18 +103,11 @@ export class CommandsProvider {
             row.addComponents(button);
         })
 
-        await message.reply({ embeds: [embed], components: [row] }).catch(console.error);
-
-        const interaction = new InteractionCollector(bot.client);
-
-        interaction.on('collect', interected => {
-            interected.reply(`<@${interected.user.id}> clicked on the ${interected.customId} button`);
-            console.log(interected.message)
-        })
+        return { embed: embed, row: row };
     }
 
-    static async createPollYesNo(message: Message, args: string[]): Promise<void> {
-        const embed = CommandsProvider.getEmbed('Votação iniciada', 'Clique para votar');
+    static createPollYesNo(message: Message, args: string[], memberToKick: GuildMember): iEmbedReturn {
+        const embed = CommandsProvider.getEmbed(message, 'Votação iniciada');
         const row = new ActionRowBuilder<ButtonBuilder>();
 
         const buttonYes = CommandsProvider.createButtonComponent('Sim', ButtonStyle.Success);
@@ -121,13 +115,6 @@ export class CommandsProvider {
         row.addComponents(buttonYes);
         row.addComponents(buttonNo);
 
-        await message.reply({ embeds: [embed], components: [row] }).catch(console.error);
-
-        const interaction = new InteractionCollector(bot.client);
-
-        interaction.on('collect', interected => {
-            interected.reply(`<@${interected.user.id}> clicked on the ${interected.customId} button`);
-            console.log(interected.message)
-        })
+        return { embed: embed, row: row };
     }
 }

@@ -15,7 +15,7 @@ const help: iCommand = {
     async execute(message: Message, args: string[]): Promise<void> {
 
         if (!args.length) {
-            const embed = CommandsProvider.getEmbed('Comandos', 'Lista de comandos disponíveis');
+            const embed = CommandsProvider.getEmbed(message, 'Comandos', 'Lista de comandos disponíveis');
             bot.commands.forEach((command) => {
                 embed.addFields({
                     name: `**${command.name}:**`,
@@ -28,9 +28,9 @@ const help: iCommand = {
             const command = bot.commands.get(args[0]) ?? bot.commands.find(cmd => cmd.aliases.includes(args[0]))
             if (!command) return;
 
-            const embed = CommandsProvider.getEmbed(command.name, command.detailedDescription);
+            const embed = CommandsProvider.getEmbed(message, command.name, command.detailedDescription);
 
-            if (command.args) embed.addFields({name: `**${command.detailedDescription}**`,value: `*${command.args}*`});
+            if (command.args) embed.addFields({ name: `**Argumentos**`, value: `*${command.args}*` });
 
             await message.reply({ embeds: [embed] }).catch(console.error);
         }
