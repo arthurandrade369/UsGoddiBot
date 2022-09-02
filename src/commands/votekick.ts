@@ -1,8 +1,17 @@
 import { iCommand } from "@src/interfaces/iCommand";
-import { Message, InteractionCollector, ButtonStyle, GuildMember } from 'discord.js';
+import { Message, ButtonStyle, GuildMember, EmbedBuilder, Collection, ComponentType } from 'discord.js';
 import { CommandsProvider } from '@src/providers/commandsProvider';
-import { bot } from '@src/index';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
+
+type PollResult = {
+    yes: number,
+    no: number
+}
+
+type EmbedFields = {
+    fieldTitle: string,
+    fieldDesc: string
+}
 
 const votekick: iCommand = {
     name: 'votekick',
@@ -19,55 +28,63 @@ const votekick: iCommand = {
         const poll = { yes: 0, no: 0 };
         const guild = message.guild;
         if (!guild?.available) return;
-        const memberToKick = CommandsProvider.getMembersById(guild, args);
-        if (!memberToKick[0]) return;
+        const memberToKick = CommandsProvider.getMembersById(guild, args).shift();
+        if (!memberToKick) return;
+        // if(!memberToKick.kickable){
+        //     message.reply('❌  **|  Esse usuário não pode ser kickado pow**');
+        //     return;
+        // }
 
-        const embedMessage = CommandsProvider.createPollYesNo(message, args, memberToKick[0]);
+        const embedMessage = CommandsProvider.createPollYesNo(message, args, memberToKick);
         embedMessage.embed.addFields({
-            name: `${memberToKick[0].displayName} merece ser kickado?`,
+            name: `${memberToKick.user.username}#${memberToKick.user.discriminator} merece ser kickado?`,
             value: 'Vote com os botões abaixo'
         })
         const response = await message.reply({ embeds: [embedMessage.embed], components: [embedMessage.row] });
 
-        const interaction = new InteractionCollector(bot.client);
+        const voted = new Collection<string, string>
+        const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 10000 });
 
-        interaction.on('collect', interected => {
-            switch (interected.customId) {
-                case 'Sim':
-                    poll.yes += 1;
-                    break;
-                case 'Não':
-                    poll.no += 1;
-                    break;
-                default:
-                    break;
+        collector.on('collect', interacted => {
+            voted.set(interacted.user.id, interacted.customId);
+            interacted.reply({ content: `Você votou ${interacted.customId}`, ephemeral: true });
+            
+            setTimeout(() => {
+                collector.stop('timed out')
+            }, 10000);
+        });
+        collector.on('end', (gone) => {
+            voted.forEach((vote) => {
+                switch (vote) {
+                    case 'Sim':
+                        poll.yes += 1;
+                        break;
+                    case 'Não':
+                        poll.no += 1;
+                        break;
+                    default:
+                        break;
+                }
+            })
+            if (poll.yes > poll.no) {
+                memberToKick.kick('Popular poll');
             }
+            updateEmbed(response, embedMessage, memberToKick, poll);
         })
-        updateEmbed(response, embedMessage, memberToKick);
-
     },
 }
 
 export default votekick;
 
-async function updateEmbed(message: Message, embedMessage: iEmbedReturn, memberToKick: (GuildMember | null)[]): Promise<void> {
-    await new Promise(wait => setTimeout(wait, 5000));
-
+async function updateEmbed(message: Message, embedMessage: iEmbedReturn, memberToKick: GuildMember, poll: PollResult): Promise<void> {
+    const memberDiscriminator = `${memberToKick.user.username}#${memberToKick.user.discriminator}`;
     const embed = CommandsProvider.getEmbed(message, 'Votação Finalizada');
     embed.data.footer = undefined;
-    // embed.addFields({
-    //     name: `${memberToKick[0]?.displayName} não mereceu ser kickado`,
-    //     value: 'Foi triste ze'
-    // })
-    // embed.addFields({
-    //     name: `**Sim:** ${poll.yes}`,
-    //     value: '10%'
-    // })
-    // embed.addFields({
-    //     name: `**Não:** ${poll.no}`,
-    //     value: '90%'
-    // })
-
+    if (poll.yes > poll.no) {
+        pollFinishedEmbed(embed, poll, { fieldTitle: `O réu, ${memberDiscriminator}, declarado culpado`, fieldDesc: 'Não tankou e foi de base' });
+    } else {
+        pollFinishedEmbed(embed, poll, { fieldTitle: `O réu, ${memberDiscriminator}, foi absolvido`, fieldDesc: 'Lili cantou' });
+    }
     const row = embedMessage.row;
 
     row.components.forEach(button => {
@@ -76,4 +93,29 @@ async function updateEmbed(message: Message, embedMessage: iEmbedReturn, memberT
     })
 
     message.edit({ embeds: [embed], components: [row] });
+}
+
+function pollFinishedEmbed(embed: EmbedBuilder, poll: PollResult, reply: EmbedFields): EmbedBuilder {
+    embed.addFields({
+        name: reply.fieldTitle,
+        value: reply.fieldDesc
+    })
+    embed.addFields({
+        name: `**Sim:** ${poll.yes}`,
+        value: `${getPerCent(poll.yes, (poll.yes + poll.no))}%`
+    })
+    embed.addFields({
+        name: `**Não:** ${poll.no}`,
+        value: `${getPerCent(poll.no, (poll.yes + poll.no))}%`
+    })
+
+    return embed;
+}
+
+function getPerCent(value: number, total: number): string {
+    const percent = (value / total) * 100;
+
+    if (percent.toString() !== 'NaN') return percent.toFixed(1);
+
+    return '0';
 }
