@@ -17,6 +17,7 @@ const votekick: iCommand = {
     name: 'votekick',
     description: 'Inicia uma votação para expulsar alguem do servidor',
     detailedDescription: 'Inicia uma votação, durante 30 seg qualquer um pode votar para expulsar alguem do servidor',
+    args: 'User',
     aliases: ['vk'],
     permission: ['everyone'],
     cooldown: 30000,
@@ -25,9 +26,12 @@ const votekick: iCommand = {
             message.reply('❌  **|  É necessário passar um usuário como target**');
             return;
         }
+
         const poll = { yes: 0, no: 0 };
+
         const guild = message.guild;
         if (!guild?.available) return;
+
         const memberToKick = CommandsProvider.getMembersById(guild, args).shift();
         if (!memberToKick) return;
         if (!memberToKick.kickable) {
@@ -35,13 +39,13 @@ const votekick: iCommand = {
             return;
         }
 
-        const embedMessage = CommandsProvider.createPollYesNo(message, args, memberToKick);
-        embedMessage.embed.addFields({
-            name: `${memberToKick.user.username}#${memberToKick.user.discriminator} merece ser kickado?`,
-            value: 'Vote com os botões abaixo'
-        })
+        const embedMessage = CommandsProvider.createPollYesNo(message,
+            [{
+                name: `${memberToKick.user.username}#${memberToKick.user.discriminator} merece ser kickado?`,
+                value: 'Vote com os botões abaixo'
+            }]
+        );
         const response = await message.reply({ embeds: [embedMessage.embed], components: [embedMessage.row] });
-
         const voted = new Collection<string, string>
         const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 10000 });
 
@@ -78,10 +82,35 @@ export default votekick;
 
 async function updateEmbed(message: Message, originalMessageAuthor: User, embedMessage: iEmbedReturn, memberToKick: GuildMember, poll: PollResult): Promise<void> {
     const memberDiscriminator = `${memberToKick.user.username}#${memberToKick.user.discriminator}`;
+
     const embed = CommandsProvider.getEmbed(message, 'Votação Finalizada');
-    embed.setFooter({ text: `Requested by : ${originalMessageAuthor.username}#${originalMessageAuthor.discriminator}`, iconURL: `${originalMessageAuthor.avatarURL()}` });
-    if (poll.yes > poll.no) pollFinishedEmbed({ embed: embed, row: embedMessage.row }, poll, { fieldTitle: `O réu, ${memberDiscriminator}, declarado culpado`, fieldDesc: 'Não tankou e foi de base' });
-    else pollFinishedEmbed({ embed: embed, row: embedMessage.row }, poll, { fieldTitle: `O réu, ${memberDiscriminator}, foi absolvido`, fieldDesc: 'Lili cantou' });
+
+    embed.setFooter(
+        {
+            text: `Requested by : ${originalMessageAuthor.username}#${originalMessageAuthor.discriminator}`,
+            iconURL: `${originalMessageAuthor.avatarURL()}`
+        });
+
+    if (poll.yes > poll.no) pollFinishedEmbed(
+        {
+            embed: embed,
+            row: embedMessage.row
+        },
+        poll,
+        {
+            fieldTitle: `O réu, ${memberDiscriminator}, declarado culpado`, fieldDesc: 'Não tankou e foi de base'
+        }
+    );
+    else pollFinishedEmbed(
+        {
+            embed: embed,
+            row: embedMessage.row
+        },
+        poll,
+        {
+            fieldTitle: `O réu, ${memberDiscriminator}, foi absolvido`, fieldDesc: 'Lili cantou'
+        }
+    );
 
     message.edit({ embeds: [embed], components: [embedMessage.row] });
 }

@@ -8,8 +8,11 @@ const question: iCommand = {
     aliases: ['p'],
     permission: ['everyone'],
     cooldown: 30000,
-    async execute(message: Message): Promise<void> {
-        message.reply('Positivo capitão broxa');
+    async execute(message: Message, args: string[]): Promise<void> {
+        if (!args.length) {
+            message.reply('❌  **|  Precisa mandar uma pergunta ze**');
+            return;
+        }
     },
 }
 

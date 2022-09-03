@@ -1,7 +1,6 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Guild, GuildMember, InteractionCollector, Message, ReplyMessageOptions } from 'discord.js';
+import { ActionRowBuilder, APIEmbedField, ButtonBuilder, ButtonStyle, EmbedBuilder, Guild, GuildMember, Message } from 'discord.js';
 import config from '@src/utils/config';
 import { iSeparatorReturn } from '@src/interfaces/iSeparatorReturn';
-import { bot } from '@src/index';
 import { iEmbedReturn } from '@src/interfaces/iEmbedReturn';
 
 export class CommandsProvider {
@@ -106,10 +105,11 @@ export class CommandsProvider {
         return { embed: embed, row: row };
     }
 
-    static createPollYesNo(message: Message, args: string[], memberToKick: GuildMember): iEmbedReturn {
+    static createPollYesNo(message: Message, fields: APIEmbedField[]): iEmbedReturn {
         const embed = CommandsProvider.getEmbed(message, 'Votação iniciada');
         const row = new ActionRowBuilder<ButtonBuilder>();
 
+        embed.addFields(fields);
         const buttonYes = CommandsProvider.createButtonComponent('Sim', ButtonStyle.Success);
         const buttonNo = CommandsProvider.createButtonComponent('Não', ButtonStyle.Danger);
         row.addComponents(buttonYes);
