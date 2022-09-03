@@ -30,10 +30,10 @@ const votekick: iCommand = {
         if (!guild?.available) return;
         const memberToKick = CommandsProvider.getMembersById(guild, args).shift();
         if (!memberToKick) return;
-        // if(!memberToKick.kickable){
-        //     message.reply('❌  **|  Esse usuário não pode ser kickado pow**');
-        //     return;
-        // }
+        if(!memberToKick.kickable){
+            message.reply('❌  **|  Esse usuário não pode ser kickado pow**');
+            return;
+        }
 
         const embedMessage = CommandsProvider.createPollYesNo(message, args, memberToKick);
         embedMessage.embed.addFields({
@@ -48,12 +48,12 @@ const votekick: iCommand = {
         collector.on('collect', interacted => {
             voted.set(interacted.user.id, interacted.customId);
             interacted.reply({ content: `Você votou ${interacted.customId}`, ephemeral: true });
-            
+
             setTimeout(() => {
                 collector.stop('timed out')
             }, 10000);
         });
-        collector.on('end', (gone) => {
+        collector.on('end', () => {
             voted.forEach((vote) => {
                 switch (vote) {
                     case 'Sim':
@@ -80,36 +80,32 @@ async function updateEmbed(message: Message, embedMessage: iEmbedReturn, memberT
     const memberDiscriminator = `${memberToKick.user.username}#${memberToKick.user.discriminator}`;
     const embed = CommandsProvider.getEmbed(message, 'Votação Finalizada');
     embed.data.footer = undefined;
-    if (poll.yes > poll.no) {
-        pollFinishedEmbed(embed, poll, { fieldTitle: `O réu, ${memberDiscriminator}, declarado culpado`, fieldDesc: 'Não tankou e foi de base' });
-    } else {
-        pollFinishedEmbed(embed, poll, { fieldTitle: `O réu, ${memberDiscriminator}, foi absolvido`, fieldDesc: 'Lili cantou' });
-    }
-    const row = embedMessage.row;
+    if (poll.yes > poll.no) pollFinishedEmbed({embed: embed, row: embedMessage.row}, poll, { fieldTitle: `O réu, ${memberDiscriminator}, declarado culpado`, fieldDesc: 'Não tankou e foi de base' });
+    else pollFinishedEmbed({embed: embed, row: embedMessage.row}, poll, { fieldTitle: `O réu, ${memberDiscriminator}, foi absolvido`, fieldDesc: 'Lili cantou' });
 
-    row.components.forEach(button => {
-        button.setDisabled(true);
-        button.setStyle(ButtonStyle.Secondary);
-    })
-
-    message.edit({ embeds: [embed], components: [row] });
+    message.edit({ embeds: [embed], components: [embedMessage.row] });
 }
 
-function pollFinishedEmbed(embed: EmbedBuilder, poll: PollResult, reply: EmbedFields): EmbedBuilder {
-    embed.addFields({
+function pollFinishedEmbed(embedMessage: iEmbedReturn, poll: PollResult, reply: EmbedFields): iEmbedReturn {
+    embedMessage.embed.addFields({
         name: reply.fieldTitle,
         value: reply.fieldDesc
     })
-    embed.addFields({
+    embedMessage.embed.addFields({
         name: `**Sim:** ${poll.yes}`,
         value: `${getPerCent(poll.yes, (poll.yes + poll.no))}%`
     })
-    embed.addFields({
+    embedMessage.embed.addFields({
         name: `**Não:** ${poll.no}`,
         value: `${getPerCent(poll.no, (poll.yes + poll.no))}%`
     })
 
-    return embed;
+    embedMessage.row.components.forEach(button => {
+        button.setDisabled(true);
+        button.setStyle(ButtonStyle.Secondary);
+    })
+
+    return embedMessage;
 }
 
 function getPerCent(value: number, total: number): string {
