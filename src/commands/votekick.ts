@@ -1,5 +1,5 @@
 import { iCommand } from "@src/interfaces/iCommand";
-import { Message, ButtonStyle, GuildMember, EmbedBuilder, Collection, ComponentType } from 'discord.js';
+import { Message, ButtonStyle, GuildMember, EmbedBuilder, Collection, ComponentType, User } from 'discord.js';
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
 
@@ -30,7 +30,7 @@ const votekick: iCommand = {
         if (!guild?.available) return;
         const memberToKick = CommandsProvider.getMembersById(guild, args).shift();
         if (!memberToKick) return;
-        if(!memberToKick.kickable){
+        if (!memberToKick.kickable) {
             message.reply('❌  **|  Esse usuário não pode ser kickado pow**');
             return;
         }
@@ -69,19 +69,19 @@ const votekick: iCommand = {
             if (poll.yes > poll.no) {
                 memberToKick.kick('Popular poll');
             }
-            updateEmbed(response, embedMessage, memberToKick, poll);
+            updateEmbed(response, message.author, embedMessage, memberToKick, poll);
         })
     },
 }
 
 export default votekick;
 
-async function updateEmbed(message: Message, embedMessage: iEmbedReturn, memberToKick: GuildMember, poll: PollResult): Promise<void> {
+async function updateEmbed(message: Message, originalMessageAuthor: User, embedMessage: iEmbedReturn, memberToKick: GuildMember, poll: PollResult): Promise<void> {
     const memberDiscriminator = `${memberToKick.user.username}#${memberToKick.user.discriminator}`;
     const embed = CommandsProvider.getEmbed(message, 'Votação Finalizada');
-    embed.data.footer = undefined;
-    if (poll.yes > poll.no) pollFinishedEmbed({embed: embed, row: embedMessage.row}, poll, { fieldTitle: `O réu, ${memberDiscriminator}, declarado culpado`, fieldDesc: 'Não tankou e foi de base' });
-    else pollFinishedEmbed({embed: embed, row: embedMessage.row}, poll, { fieldTitle: `O réu, ${memberDiscriminator}, foi absolvido`, fieldDesc: 'Lili cantou' });
+    embed.setFooter({ text: `Requested by : ${originalMessageAuthor.username}#${originalMessageAuthor.discriminator}`, iconURL: `${originalMessageAuthor.avatarURL()}` });
+    if (poll.yes > poll.no) pollFinishedEmbed({ embed: embed, row: embedMessage.row }, poll, { fieldTitle: `O réu, ${memberDiscriminator}, declarado culpado`, fieldDesc: 'Não tankou e foi de base' });
+    else pollFinishedEmbed({ embed: embed, row: embedMessage.row }, poll, { fieldTitle: `O réu, ${memberDiscriminator}, foi absolvido`, fieldDesc: 'Lili cantou' });
 
     message.edit({ embeds: [embed], components: [embedMessage.row] });
 }
