@@ -3,6 +3,7 @@ import { Message } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
 import { bot } from '@src/index';
 import { CommandsProvider } from '@src/providers/commandsProvider';
+import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
 
 
 const help: iCommand = {
@@ -12,27 +13,34 @@ const help: iCommand = {
     aliases: ['h'],
     permission: ['everyone'],
     cooldown: undefined,
+    active: true,
     async execute(message: Message, args: string[]): Promise<void> {
-
-        if (!args.length) {
-            const embed = CommandsProvider.getEmbed(message, 'Comandos', 'Lista de comandos disponíveis');
-            bot.commands.forEach((command) => {
-                embed.addFields({
-                    name: `**${command.name}:**`,
-                    value: `*${command.description}*`,
+        try {
+            if (!args.length) {
+                const embed = CommandsProvider.getEmbed(message, 'Lista de Comandos', 'Comandos ativos');
+                bot.commands.forEach((command) => {
+                    if (command.active) {
+                        embed.addFields({
+                            name: `**${command.name}:**`,
+                            value: `*${command.description}*`,
+                        });
+                    }
                 });
-            });
 
-            await message.reply({ embeds: [embed] }).catch(console.error);
-        } else {
-            const command = bot.commands.get(args[0]) ?? bot.commands.find(cmd => cmd.aliases.includes(args[0]))
-            if (!command) return;
+                await message.reply({ embeds: [embed] }).catch(console.error);
+            } else {
+                const command = bot.commands.get(args[0]) ?? bot.commands.find(cmd => cmd.aliases.includes(args[0]))
+                if (!command) throw new CommandsCallError(message, 'Comando não existe');
 
-            const embed = CommandsProvider.getEmbed(message, command.name, command.detailedDescription);
+                const embed = CommandsProvider.getEmbed(message, command.name, command.detailedDescription);
 
-            if (command.args) embed.addFields({ name: `**Argumentos**`, value: `*${command.args}*` });
+                if (command.args) embed.addFields({ name: `**Argumentos**`, value: `*\`${command.args}\`*` });
 
-            await message.reply({ embeds: [embed] }).catch(console.error);
+                await message.reply({ embeds: [embed] }).catch(console.error);
+            }
+        } catch (error) {
+            if (error instanceof CommandsCallError) error.sendResponse();
+            if (error instanceof CommandsInternalError) error.logError();
         }
     }
 }

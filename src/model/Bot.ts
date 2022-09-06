@@ -38,16 +38,15 @@ export class Bot {
 
     private async onMessage(): Promise<void> {
         this.client.on('messageCreate', async (message: Message) => {
-            if (message.author.bot) {
-                return;
-            }
+            if (message.author.bot) return;
+            if (!message.content.startsWith(config.general.TRIGGER)) return;
+
             const content = CommandsProvider.separateTrigger(message.content);
             if (!content) return;
 
             const command = this.commands.get(content.command) ?? this.commands.find((cmd) => cmd.aliases?.includes(content.command));
             if (!command) return;
-
-            await command.execute(message, content.args);
+            if (command.active) await command.execute(message, content.args);
         })
     }
 }

@@ -42,7 +42,10 @@ export class CommandsProvider {
 
         // embed.setThumbnail('https://pbs.twimg.com/profile_images/1215734764323377152/-hmYx6ee_400x400.jpg');
         embed.setTitle(title);
-        embed.setFooter({ text: `Requested by : ${message.author.username}#${message.author.discriminator}`, iconURL: `${message.author.avatarURL()}` });
+        embed.setFooter({
+            text: `Requested by : ${message.author.username}#${message.author.discriminator}`,
+            iconURL: `${message.author.avatarURL()}`
+        });
         if (description) embed.setDescription(description);
 
         return embed;

@@ -9,6 +9,7 @@ const poll: iCommand = {
     aliases: [],
     permission: [],
     cooldown: undefined,
+    active: false,
     async execute(message: Message, args: string[]): Promise<void> {
         if (!args.length) {
             message.reply('❌  **|  É necessário passar argumentos para a votação**');

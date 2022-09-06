@@ -6,7 +6,8 @@ export interface iCommand {
     detailedDescription: string;
     args?: string;
     aliases: string[];
-    permission: string[]
+    permission: string[];
     cooldown?: number;
-    execute(message: Message, args?: string | string[]): Promise<void>;
+    active: boolean;
+    execute(message: Message, args?: string[]): Promise<void>;
 }

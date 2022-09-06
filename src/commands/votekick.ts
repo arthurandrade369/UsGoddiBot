@@ -2,6 +2,7 @@ import { iCommand } from "@src/interfaces/iCommand";
 import { Message, ButtonStyle, GuildMember, EmbedBuilder, Collection, ComponentType, User } from 'discord.js';
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
+import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
 
 type PollResult = {
     yes: number,
@@ -21,60 +22,60 @@ const votekick: iCommand = {
     aliases: ['vk'],
     permission: ['everyone'],
     cooldown: 30000,
+    active: true,
     async execute(message: Message, args: string[]): Promise<void> {
-        if (!args.length) {
-            message.reply('❌  **|  É necessário passar um usuário como target**');
-            return;
-        }
+        try {
+            if (!args.length) throw new CommandsCallError(message, 'É necessário passar um usuário como target')
 
-        const poll = { yes: 0, no: 0 };
+            const poll = { yes: 0, no: 0 };
 
-        const guild = message.guild;
-        if (!guild?.available) return;
+            const guild = message.guild;
+            if (!guild?.available) throw new CommandsInternalError('Guild unvailable or unexists');
 
-        const memberToKick = CommandsProvider.getMembersById(guild, args).shift();
-        if (!memberToKick) return;
-        if (!memberToKick.kickable) {
-            message.reply('❌  **|  Esse usuário não pode ser kickado pow**');
-            return;
-        }
+            const memberToKick = CommandsProvider.getMembersById(guild, args).shift();
+            if (!memberToKick) throw new CommandsCallError(message, 'Membro não existe');
+            if (!memberToKick.kickable) throw new CommandsCallError(message, 'Esse usuário não pode ser kickado')
 
-        const embedMessage = CommandsProvider.createPollYesNo(message,
-            [{
-                name: `${memberToKick.user.username}#${memberToKick.user.discriminator} merece ser kickado?`,
-                value: 'Vote com os botões abaixo'
-            }]
-        );
-        const response = await message.reply({ embeds: [embedMessage.embed], components: [embedMessage.row] });
-        const voted = new Collection<string, string>
-        const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 10000 });
+            const embedMessage = CommandsProvider.createPollYesNo(message,
+                [{
+                    name: `${memberToKick.user.username}#${memberToKick.user.discriminator} merece ser kickado?`,
+                    value: 'Vote com os botões abaixo'
+                }]
+            );
+            const response = await message.reply({ embeds: [embedMessage.embed], components: [embedMessage.row] });
+            const voted = new Collection<string, string>
+            const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 10000 });
 
-        collector.on('collect', interacted => {
-            voted.set(interacted.user.id, interacted.customId);
-            interacted.reply({ content: `Você votou ${interacted.customId}`, ephemeral: true });
+            collector.on('collect', interacted => {
+                voted.set(interacted.user.id, interacted.customId);
+                interacted.reply({ content: `Você votou ${interacted.customId}`, ephemeral: true });
 
-            setTimeout(() => {
-                collector.stop('timed out')
-            }, 10000);
-        });
-        collector.on('end', () => {
-            voted.forEach((vote) => {
-                switch (vote) {
-                    case 'Sim':
-                        poll.yes += 1;
-                        break;
-                    case 'Não':
-                        poll.no += 1;
-                        break;
-                    default:
-                        break;
+                setTimeout(() => {
+                    collector.stop('timed out')
+                }, 10000);
+            });
+            collector.on('end', () => {
+                voted.forEach((vote) => {
+                    switch (vote) {
+                        case 'Sim':
+                            poll.yes += 1;
+                            break;
+                        case 'Não':
+                            poll.no += 1;
+                            break;
+                        default:
+                            break;
+                    }
+                })
+                if (poll.yes > poll.no) {
+                    memberToKick.kick('Popular poll');
                 }
+                updateEmbed(response, message.author, embedMessage, memberToKick, poll);
             })
-            if (poll.yes > poll.no) {
-                memberToKick.kick('Popular poll');
-            }
-            updateEmbed(response, message.author, embedMessage, memberToKick, poll);
-        })
+        } catch (error) {
+            if (error instanceof CommandsCallError) error.sendResponse();
+            if (error instanceof CommandsInternalError) error.logError();
+        }
     },
 }
 

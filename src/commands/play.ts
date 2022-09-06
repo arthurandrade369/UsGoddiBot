@@ -8,9 +8,9 @@ const play: iCommand = {
     aliases: ['p'],
     permission: [],
     cooldown: undefined,
-    async execute(message: Message): Promise<void> {
-        message.reply('Positivo capitão broxa');
-    },
+    active: false,
+    async execute(message: Message, args: string[]): Promise<void> {
+        
+    }
 }
-
 export default play;

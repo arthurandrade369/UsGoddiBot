@@ -8,11 +8,9 @@ const question: iCommand = {
     aliases: ['p'],
     permission: ['everyone'],
     cooldown: 30000,
+    active: false,
     async execute(message: Message, args: string[]): Promise<void> {
-        if (!args.length) {
-            message.reply('❌  **|  Precisa mandar uma pergunta ze**');
-            return;
-        }
+        
     },
 }
 
