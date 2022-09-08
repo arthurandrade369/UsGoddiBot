@@ -1,5 +1,5 @@
 import { iCommand } from "@src/interfaces/iCommand";
-import { Message, ButtonStyle, GuildMember, EmbedBuilder, Collection, ComponentType, User } from 'discord.js';
+import { Message, ButtonStyle, GuildMember, Collection, ComponentType, User } from 'discord.js';
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
@@ -16,8 +16,8 @@ type EmbedFields = {
 
 const votekick: iCommand = {
     name: 'votekick',
-    description: 'Inicia uma votação para expulsar alguem do servidor',
-    detailedDescription: 'Inicia uma votação, durante 30 seg qualquer um pode votar para expulsar alguem do servidor',
+    description: 'Inicia uma votação, com 30 seg de duração, para expulsar alguem do servidor',
+    group: 'general',
     args: 'User',
     aliases: ['vk'],
     permission: ['everyone'],

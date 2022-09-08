@@ -9,17 +9,26 @@ export class MappingDirectories {
      */
     static pathResolve(directory: string, file?: string): string {
         let dir;
-        if (!file) {
-            dir = join(resolve(__dirname, '../..'), directory);
-        }else{
-            dir = join(directory, file);
-        }
+
+        if (!file) { dir = join(resolve(__dirname, '../..'), directory); }
+        else { dir = join(directory, file); }
 
         return dir;
     }
 
+    /**
+     * Return the path resolved to all files in the directory, even if they are in a directory
+     * @param directory string 
+     * @returns string[]
+     */
     static filesResolve(directory: string): string[] {
-        const files = readdirSync(directory).filter((file) => file.endsWith('.ts'));
+        let files: string[] = [];
+        readdirSync(directory, { withFileTypes: true }).forEach(dirent => {
+            if(dirent.isDirectory()) files = files.concat(readdirSync(`${directory}\\${dirent.name}`).map(files => `${dirent.name}\\${files}`));
+            else files.push(dirent.name);
+        });
+        console.log(files);
+
         return files;
     }
 }

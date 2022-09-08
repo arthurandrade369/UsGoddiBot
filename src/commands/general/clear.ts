@@ -4,7 +4,7 @@ import { Message } from "discord.js";
 const clean: iCommand = {
     name: 'clear',
     description: 'Apaga todas as ultimas 100 mensagens',
-    detailedDescription: 'Apaga todas as 100 ultimas mensagens, sem filtro',
+    group: 'general',
     aliases: [],
     permission: ['ADMINISTRADOR'],
     cooldown: undefined,

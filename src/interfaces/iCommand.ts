@@ -3,7 +3,7 @@ import type { Message } from 'discord.js';
 export interface iCommand {
     name: string;
     description: string;
-    detailedDescription: string;
+    group: string;
     args?: string;
     aliases: string[];
     permission: string[];

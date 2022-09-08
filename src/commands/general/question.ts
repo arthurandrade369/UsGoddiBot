@@ -4,7 +4,7 @@ import { Message } from "discord.js";
 const question: iCommand = {
     name: 'question',
     description: 'Pergunta de sim ou não',
-    detailedDescription: 'Inicia uma questão de resposta sim ou não, durante 30 seg qualquer um pode responder',
+    group: 'general',
     aliases: ['p'],
     permission: ['everyone'],
     cooldown: 30000,

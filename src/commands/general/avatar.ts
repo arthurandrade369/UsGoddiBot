@@ -1,4 +1,3 @@
-import '../utils/module-alias';
 import type { Message } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
 import { CommandsProvider } from '@src/providers/commandsProvider';
@@ -7,7 +6,7 @@ import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsErr
 const avatar: iCommand = {
     name: 'avatar',
     description: 'Envia o avatar do membro marcado.',
-    detailedDescription: 'Envia o avatar do membro marcado',
+    group: 'general',
     args: 'Membro',
     aliases: [],
     permission: [],

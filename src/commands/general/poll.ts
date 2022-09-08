@@ -5,7 +5,7 @@ import { CommandsProvider } from '@src/providers/commandsProvider';
 const poll: iCommand = {
     name: 'poll',
     description: 'Inicia uma votação',
-    detailedDescription: 'Inicia uma votação por certos parametros',
+    group: 'general',
     aliases: [],
     permission: [],
     cooldown: undefined,

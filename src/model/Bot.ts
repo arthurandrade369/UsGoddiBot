@@ -1,13 +1,16 @@
 import '../utils/module-alias';
-import { Collection, Client, ActivityType, Message } from 'discord.js';
+import { Collection, Client, ActivityType, Message, Snowflake } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
 import config from '@src/utils/config';
 import { MappingDirectories } from '@src/utils/mappingDirectories';
 import { CommandsProvider } from '@src/providers/commandsProvider';
+import { MusicQueue } from '@src/model/MusicQueue';
 
 export class Bot {
     public commands = new Collection<string, iCommand>();
-    public cooldown = new Collection<string, Collection<string, number>>;
+    public groups = new Collection<string, { command: string, group: string }>()
+    public cooldown = new Collection<string, Collection<string, number>>();
+    public queue = new Collection<Snowflake, MusicQueue>()
 
     public constructor(public readonly client: Client) {
         this.client.login(config.general.TOKEN);
@@ -26,13 +29,14 @@ export class Bot {
     }
 
     private async importCommands(): Promise<void> {
-        type CommandImport = typeof import('@src/commands/help');
+        type CommandImport = typeof import('@src/commands/general/help');
         const path = MappingDirectories.pathResolve('src/commands');
         const commandFiles = MappingDirectories.filesResolve(path);
 
         for (const file of commandFiles) {
             const command: CommandImport = await import(MappingDirectories.pathResolve(path, file));
             this.commands.set(command.default.name, command.default);
+            this.groups.set(command.default.group, { command: command.default.name, group: command.default.group });
         }
     }
 
