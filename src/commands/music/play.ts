@@ -1,12 +1,22 @@
 
-import { DiscordGatewayAdapterCreator, joinVoiceChannel } from "@discordjs/voice";
-import { bot } from "@src/index";
+import {
+    createAudioPlayer,
+    DiscordGatewayAdapterCreator,
+    joinVoiceChannel,
+    NoSubscriberBehavior,
+    createAudioResource,
+    StreamType,
+    AudioPlayerState,
+    AudioPlayerStatus
+} from '@discordjs/voice';
 import { iCommand } from "@src/interfaces/iCommand";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
-import { MusicQueue, Song } from "@src/model/MusicQueue";
 import { Groups } from "@src/providers/Groups";
+import { ytVideoPattern } from "@src/providers/patternRegex";
 import { Message } from 'discord.js';
-import { YouTube } from "youtube-sr";
+import { Video, YouTube } from "youtube-sr";
+import ytdl from 'ytdl-core-discord';
+import { videoInfo } from 'ytdl-core'
 
 const play: iCommand = {
     name: 'play',
@@ -22,27 +32,75 @@ const play: iCommand = {
             const VoiceChannel = message.member?.voice.channel;
             const url = await YouTube.searchOne(music.toString());
 
-            let song;
+            let song: SongData;
+            let songs: SongData[] = [];
 
             try {
-                song = await Song.from(url.url, music.join(" "));
+                const isYoutubeUrl = ytVideoPattern.test(url.url);
+
+                let songInfo: videoInfo | Video;
+
+                if (isYoutubeUrl) {
+                    songInfo = await ytdl.getInfo(url.url);
+
+                    song = {
+                        url: songInfo.videoDetails.video_url,
+                        title: songInfo.videoDetails.title,
+                        duration: parseInt(songInfo.videoDetails.lengthSeconds)
+                    };
+                } else {
+                    const result = await YouTube.searchOne(music.join(' '));
+
+                    songInfo = await ytdl.getInfo(`https://youtube.com/watch?v=${result.id}`);
+
+                    song = {
+                        url: songInfo.videoDetails.video_url,
+                        title: songInfo.videoDetails.title,
+                        duration: parseInt(songInfo.videoDetails.lengthSeconds)
+                    };
+                }
             } catch (error) {
                 console.error(error);
-                message.reply('Error').catch(console.error);
             }
 
-            const newQueue = new MusicQueue({
-                message,
-                connection: joinVoiceChannel({
-                    channelId: VoiceChannel!.id,
-                    guildId: message.guild!.id,
-                    adapterCreator: message.guild!.voiceAdapterCreator as DiscordGatewayAdapterCreator
-                })
+            const connection = joinVoiceChannel({
+                channelId: VoiceChannel!.id,
+                guildId: message.guild!.id,
+                adapterCreator: message.guild!.voiceAdapterCreator,
             });
 
-            if (!song) return;
-            newQueue.enqueue(song);
+            const player = createAudioPlayer({
+                behaviors: {
+                    noSubscriber: NoSubscriberBehavior.Play,
+                },
+            });
 
+            const subscription = connection.subscribe(player);
+            if (!subscription) return;
+
+            player.on('stateChange', async (oldState, newState) => {
+
+            });
+
+            let stream;
+
+            let type = url.url.includes("youtube.com") ? StreamType.Opus : StreamType.OggOpus;
+
+            const source = url.url.includes("youtube") ? "youtube" : "soundcloud";
+
+            if (source === "youtube") {
+                stream = await ytdl(url.url, { quality: "highestaudio", highWaterMark: 1 << 25 });
+            }
+
+            if (!stream) return;
+
+            const resource = createAudioResource(stream, {
+                metadata: { title: 'What a beautiful song' },
+                inputType: type,
+                inlineVolume: true,
+            });
+
+            player.play(resource);
 
         } catch (error) {
             if (error instanceof CommandsCallError) error.sendResponse();
@@ -52,3 +110,9 @@ const play: iCommand = {
     }
 }
 export default play;
+
+type SongData = {
+    url: string;
+    title: string;
+    duration: number;
+}
