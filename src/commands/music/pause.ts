@@ -1,10 +1,11 @@
 import { iCommand } from "@src/interfaces/iCommand";
+import { Groups } from "@src/providers/Groups";
 import { Message } from "discord.js";
 
 const pause: iCommand = {
     name: 'pause',
     description: '',
-    group: 'music',
+    group: Groups.music,
     aliases: [],
     permission: ['everyone'],
     cooldown: undefined,

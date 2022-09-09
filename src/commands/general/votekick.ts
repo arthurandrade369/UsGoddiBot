@@ -3,6 +3,7 @@ import { Message, ButtonStyle, GuildMember, Collection, ComponentType, User } fr
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
+import { Groups } from "@src/providers/Groups";
 
 type PollResult = {
     yes: number,
@@ -17,7 +18,7 @@ type EmbedFields = {
 const votekick: iCommand = {
     name: 'votekick',
     description: 'Inicia uma votação, com 30 seg de duração, para expulsar alguem do servidor',
-    group: 'general',
+    group: Groups.general,
     args: 'User',
     aliases: ['vk'],
     permission: ['everyone'],

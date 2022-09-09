@@ -2,11 +2,12 @@ import type { Message } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
+import { Groups } from '@src/providers/Groups';
 
 const avatar: iCommand = {
     name: 'avatar',
     description: 'Envia o avatar do membro marcado.',
-    group: 'general',
+    group: Groups.general,
     args: 'Membro',
     aliases: [],
     permission: [],

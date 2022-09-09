@@ -1,10 +1,11 @@
 import { iCommand } from "@src/interfaces/iCommand";
+import { Groups } from "@src/providers/Groups";
 import { Message } from "discord.js";
 
 const clean: iCommand = {
     name: 'clear',
     description: 'Apaga todas as ultimas 100 mensagens',
-    group: 'general',
+    group: Groups.general,
     aliases: [],
     permission: ['ADMINISTRADOR'],
     cooldown: undefined,

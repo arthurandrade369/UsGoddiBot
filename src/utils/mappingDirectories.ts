@@ -27,7 +27,6 @@ export class MappingDirectories {
             if(dirent.isDirectory()) files = files.concat(readdirSync(`${directory}\\${dirent.name}`).map(files => `${dirent.name}\\${files}`));
             else files.push(dirent.name);
         });
-        console.log(files);
 
         return files;
     }

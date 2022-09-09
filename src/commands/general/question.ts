@@ -1,10 +1,11 @@
 import { iCommand } from "@src/interfaces/iCommand";
+import { Groups } from "@src/providers/Groups";
 import { Message } from "discord.js";
 
 const question: iCommand = {
     name: 'question',
     description: 'Pergunta de sim ou não',
-    group: 'general',
+    group: Groups.general,
     aliases: ['p'],
     permission: ['everyone'],
     cooldown: 30000,

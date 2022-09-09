@@ -4,12 +4,13 @@ import { bot } from '@src/index';
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
 import config from '@src/utils/config';
+import { Groups } from "@src/providers/Groups";
 
 
 const help: iCommand = {
     name: 'help',
     description: `Mostra comandos e descrições.`,
-    group: 'general',
+    group: Groups.general,
     aliases: ['h'],
     permission: ['everyone'],
     cooldown: undefined,

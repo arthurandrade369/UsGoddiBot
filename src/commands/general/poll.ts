@@ -1,11 +1,12 @@
 import { iCommand } from "@src/interfaces/iCommand";
 import { Message } from 'discord.js';
 import { CommandsProvider } from '@src/providers/commandsProvider';
+import { Groups } from "@src/providers/Groups";
 
 const poll: iCommand = {
     name: 'poll',
     description: 'Inicia uma votação',
-    group: 'general',
+    group: Groups.general,
     aliases: [],
     permission: [],
     cooldown: undefined,
