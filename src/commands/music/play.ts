@@ -1,22 +1,21 @@
 
 import {
     createAudioPlayer,
-    DiscordGatewayAdapterCreator,
     joinVoiceChannel,
     NoSubscriberBehavior,
     createAudioResource,
-    StreamType,
-    AudioPlayerState,
-    AudioPlayerStatus
+    StreamType
 } from '@discordjs/voice';
 import { iCommand } from "@src/interfaces/iCommand";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
-import { Groups } from "@src/providers/Groups";
+import { Groups } from "@src/providers/groups";
 import { ytVideoPattern } from "@src/providers/patternRegex";
 import { Message } from 'discord.js';
 import { Video, YouTube } from "youtube-sr";
 import ytdl from 'ytdl-core-discord';
 import { videoInfo } from 'ytdl-core'
+import { iSongData } from '@src/interfaces/iSongData';
+import { SongQueue } from '../../model/SongQueue';
 
 const play: iCommand = {
     name: 'play',
@@ -32,10 +31,18 @@ const play: iCommand = {
             const VoiceChannel = message.member?.voice.channel;
             const url = await YouTube.searchOne(music.toString());
 
-            let song: SongData;
-            let songs: SongData[] = [];
+            let song: iSongData;
 
             try {
+                const queue = new SongQueue({
+                    message: message,
+                    connection: joinVoiceChannel({
+                        channelId: VoiceChannel!.id,
+                        guildId: message.guild!.id,
+                        adapterCreator: message.guild!.voiceAdapterCreator,
+                    })
+                })
+
                 const isYoutubeUrl = ytVideoPattern.test(url.url);
 
                 let songInfo: videoInfo | Video;
@@ -63,28 +70,9 @@ const play: iCommand = {
                 console.error(error);
             }
 
-            const connection = joinVoiceChannel({
-                channelId: VoiceChannel!.id,
-                guildId: message.guild!.id,
-                adapterCreator: message.guild!.voiceAdapterCreator,
-            });
-
-            const player = createAudioPlayer({
-                behaviors: {
-                    noSubscriber: NoSubscriberBehavior.Play,
-                },
-            });
-
-            const subscription = connection.subscribe(player);
-            if (!subscription) return;
-
-            player.on('stateChange', async (oldState, newState) => {
-
-            });
-
             let stream;
 
-            let type = url.url.includes("youtube.com") ? StreamType.Opus : StreamType.OggOpus;
+            const type = url.url.includes("youtube.com") ? StreamType.Opus : StreamType.OggOpus;
 
             const source = url.url.includes("youtube") ? "youtube" : "soundcloud";
 
@@ -110,9 +98,3 @@ const play: iCommand = {
     }
 }
 export default play;
-
-type SongData = {
-    url: string;
-    title: string;
-    duration: number;
-}

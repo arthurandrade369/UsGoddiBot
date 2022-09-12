@@ -4,13 +4,13 @@ import type { iCommand } from '@src/interfaces/iCommand';
 import config from '@src/utils/config';
 import { MappingDirectories } from '@src/utils/mappingDirectories';
 import { CommandsProvider } from '@src/providers/commandsProvider';
-import { MusicQueue } from '@src/model/MusicQueue';
+import { SongQueue } from '@src/model/SongQueue';
 
 export class Bot {
     public commands = new Collection<string, iCommand>();
-    public groups = new Collection<string, { command: string, group: string }>()
+    public groups = new Collection<string, iGroupData>()
     public cooldown = new Collection<string, Collection<string, number>>();
-    public queue = new Collection<Snowflake, MusicQueue>()
+    public queue = new Collection<Snowflake, SongQueue>()
 
     public constructor(public readonly client: Client) {
         this.client.login(config.general.TOKEN);
@@ -37,7 +37,7 @@ export class Bot {
             const command: CommandImport = await import(MappingDirectories.pathResolve(path, file));
             if (command.default.active) {
                 this.commands.set(command.default.name, command.default);
-                this.groups.set(command.default.group, { command: command.default.name, group: command.default.group });
+                this.groups.set(command.default.group, { commandName: command.default.name, groupName: command.default.group });
             }
         }
     }
@@ -55,4 +55,9 @@ export class Bot {
             if (command.active) await command.execute(message, content.args);
         })
     }
+}
+
+type iGroupData = {
+    commandName: string;
+    groupName: string;
 }

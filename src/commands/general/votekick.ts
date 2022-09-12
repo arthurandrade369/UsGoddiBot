@@ -3,7 +3,7 @@ import { Message, ButtonStyle, GuildMember, Collection, ComponentType, User } fr
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
-import { Groups } from "@src/providers/Groups";
+import { Groups } from "@src/providers/groups";
 
 type PollResult = {
     yes: number,

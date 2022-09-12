@@ -3,8 +3,7 @@ import type { iCommand } from '@src/interfaces/iCommand';
 import { bot } from '@src/index';
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
-import config from '@src/utils/config';
-import { Groups } from "@src/providers/Groups";
+import { Groups } from "@src/providers/groups";
 
 
 const help: iCommand = {
@@ -70,7 +69,7 @@ function getStringFromArrayOfCommands(array: string[]): string {
 }
 
 function getArrayFromCommandCollection(group: string): string[] {
-    let commands: string[] = [];
+    const commands: string[] = [];
     bot.commands.map(command => {
         if (command.group.includes(group)) return command.name;
         return undefined;

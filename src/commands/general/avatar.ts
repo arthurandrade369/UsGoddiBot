@@ -2,7 +2,7 @@ import type { Message } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
 import { CommandsProvider } from '@src/providers/commandsProvider';
 import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
-import { Groups } from '@src/providers/Groups';
+import { Groups } from '@src/providers/groups';
 
 const avatar: iCommand = {
     name: 'avatar',

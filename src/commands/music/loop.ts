@@ -1,5 +1,5 @@
 import { iCommand } from "@src/interfaces/iCommand";
-import { Groups } from "@src/providers/Groups";
+import { Groups } from "@src/providers/groups";
 import { Message } from "discord.js";
 
 const loop: iCommand = {
