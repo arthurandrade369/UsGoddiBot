@@ -7,7 +7,7 @@ export default {
         "LOCALE": 'en',
         "INVITE_LINK": 'https://discord.com/api/oauth2/authorize?client_id=1003658531846758490&permissions=8&scope=bot'
     },
-    "music": {
-        "VOLUME": 100,
+    "voice": {
+        "STAY_TIME": 0.25, // In minutes
     }
 }
