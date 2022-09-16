@@ -9,5 +9,5 @@ export interface iCommand {
     permission: string[];
     cooldown?: number;
     active: boolean;
-    execute(message: Message, args?: string[]): Promise<void>;
+    execute(message: Message, args?: string[]): Promise<Message<boolean> | void>;
 }

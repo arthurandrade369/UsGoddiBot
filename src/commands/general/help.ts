@@ -19,11 +19,11 @@ const help: iCommand = {
             if (!args.length) {
                 const embed = CommandsProvider.getEmbed(message, 'Lista de Comandos por grupos', 'Tente !help [grupo]');
                 bot.groups.forEach(group => {
-                    const commands = getArrayFromCommandCollection(group.group);
+                    const commands = getArrayFromCommandCollection(group.groupName);
                     const command = getStringFromArrayOfCommands(commands);
 
                     embed.addFields({
-                        name: `*${group.group} :*`,
+                        name: `*${group.groupName} :*`,
                         value: command,
                     });
                 });
@@ -34,12 +34,12 @@ const help: iCommand = {
                 if (!group) throw new CommandsInternalError(`Commands groups not found: ${args[0]}`);
 
                 const commands = bot.commands.map(command => {
-                    if (group.group === command.group) return command;
+                    if (group.groupName === command.group) return command;
 
                     return undefined
                 });
 
-                const embed = CommandsProvider.getEmbed(message, `\`${group.group}\``);
+                const embed = CommandsProvider.getEmbed(message, `\`${group.groupName}\``);
 
                 commands.forEach(command => {
                     if (!command) return;

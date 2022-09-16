@@ -4,6 +4,9 @@ import { Video, YouTube } from "youtube-sr";
 import ytdl from 'ytdl-core-discord';
 import { videoInfo } from 'ytdl-core';
 import { createAudioResource, StreamType } from "@discordjs/voice";
+import internal from "stream";
+import { APIEmbed, MessagePayload } from "discord.js";
+import { EmbedBuilder } from "@discordjs/builders";
 
 export class Song {
     public readonly url;
@@ -47,7 +50,7 @@ export class Song {
     }
 
     public async makeResource() {
-        let stream;
+        let stream: internal.Readable | undefined;
 
         const type = this.url.includes("youtube.com") ? StreamType.Opus : StreamType.OggOpus;
 
@@ -62,11 +65,11 @@ export class Song {
         return createAudioResource(stream, {
             metadata: this,
             inputType: type,
-            inlineVolume: true,
         });
     }
 
-    public embedMessage() {
-
+    public embedMessage(): EmbedBuilder{
+        const playingEmbed = new EmbedBuilder(); 
+        return playingEmbed;
     }
 }

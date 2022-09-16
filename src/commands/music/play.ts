@@ -16,6 +16,7 @@ import ytdl from 'ytdl-core-discord';
 import { videoInfo } from 'ytdl-core'
 import { iSongData } from '@src/interfaces/iSongData';
 import { SongQueue } from '../../model/SongQueue';
+import { bot } from '@src/index';
 
 const play: iCommand = {
     name: 'play',
@@ -25,17 +26,23 @@ const play: iCommand = {
     permission: [],
     cooldown: undefined,
     active: true,
-    async execute(message: Message, music: string[]): Promise<void> {
+    async execute(message: Message, music: string[]): Promise<Message<boolean> | void> {
         try {
-            if (!message.member!.voice.channel) throw new CommandsCallError(message, 'Você não está em um canal de voz');
             const VoiceChannel = message.member?.voice.channel;
-            const url = await YouTube.searchOne(music.toString());
+            if (!VoiceChannel) throw new CommandsCallError(message, 'Você não está em um canal de voz');
 
+            const queue = bot.queue.get(message.guild!.id);
+            if (queue && VoiceChannel.id !== queue.connection.joinConfig.channelId) {
+                return message.reply('Você precisa estar no mesmo canal que o Bot').catch(console.error);
+            }
+            if (!music.length) return message.reply('Tente !help music').catch(console.error);
+            
+            const url = music.toString();
             try {
-                const queue = new SongQueue({
+                const newQueue = new SongQueue({
                     message: message,
                     connection: joinVoiceChannel({
-                        channelId: VoiceChannel!.id,
+                        channelId: VoiceChannel.id,
                         guildId: message.guild!.id,
                         adapterCreator: message.guild!.voiceAdapterCreator,
                     })
@@ -43,10 +50,6 @@ const play: iCommand = {
             } catch (error) {
                 console.error(error);
             }
-
-            
-
-            player.play(resource);
 
         } catch (error) {
             if (error instanceof CommandsCallError) error.sendResponse();
