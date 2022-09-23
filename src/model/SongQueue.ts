@@ -11,12 +11,26 @@ import {
     AudioPlayerState,
     AudioPlayerPlayingState
 } from '@discordjs/voice';
-import { Message, TextChannel } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonComponent,
+    ButtonStyle,
+    Interaction,
+    Message,
+    TextChannel,
+    User,
+    ComponentType,
+    ButtonInteraction,
+    CacheType
+} from 'discord.js';
 import { iQueueArgs } from '../interfaces/iQueueArgs';
 import { Song } from '@src/model/Song';
-import { bot } from '../index';
 import config from '@src/utils/config';
 import { promisify } from 'util';
+import { CommandsProvider } from '@src/providers/commandsProvider'
+import { Emojis } from '@src/providers/emojis';
+import { bot } from '@src/index';
 
 const wait = promisify(setTimeout);
 
@@ -25,6 +39,7 @@ export class SongQueue {
     public readonly connection: VoiceConnection;
     public readonly player: AudioPlayer;
     public readonly textChannel: TextChannel;
+    public readonly bot = bot;
 
     public resource?: AudioResource;
     public songs: Song[] = [];
@@ -144,15 +159,76 @@ export class SongQueue {
     private async sendPlayingEmbed(newState: AudioPlayerPlayingState): Promise<void> {
         const song = (newState.resource as AudioResource<Song>).metadata;
 
-        let playingMessage: Message;
+        let buttonsComponent = this.createButtonsComponents();
+        const playingMessage = await this.textChannel.send({ embeds: [song.embedMessage(this.message)], components: [buttonsComponent] });
 
-        try {
-            playingMessage = await this.textChannel.send({ embeds: [song.embedMessage()] });
+        const filter = (interaction: ButtonInteraction<CacheType>) => interaction.user.id !== this.textChannel.client.user!.id;
+        const collector = playingMessage.createMessageComponentCollector({
+            filter,
+            componentType: ComponentType.Button,
+            time: parseInt(song.duration) > 0 ? parseInt(song.duration) * 1000 : 60000
+        });
 
-            
-        } catch (error) {
+        collector.on('collect', async (interacted) => {
+            switch (interacted.customId) {
+                case 'playpause':
+                    if (!(interacted.user.id !== this.message.author.id)) {
+                        interacted.reply({ content: 'Essa musica não foi pedida por voce', ephemeral: true });
+                    }
 
+                    if (this.player.state.status === AudioPlayerStatus.Playing) {
+                        await this.bot.commands.get("pause")!.execute(this.message);
+                    } else {
+                        await this.bot.commands.get("resume")!.execute(this.message);
+                    }
+
+                    break;
+
+                case 'next':
+
+                    break;
+
+                case 'loop':
+
+                    break;
+
+                case 'shuffle':
+
+                    break;
+
+                case 'stop':
+                    if (!(interacted.user.id !== this.message.author.id)) {
+                        interacted.reply({ content: 'Essa musica não foi pedida por voce', ephemeral: true });
+                    }
+
+                    await this.bot.commands.get("stop")!.execute(this.message);
+                    collector.stop();
+                    break;
+
+                default:
+                    break;
+            }
+        });
+
+        collector.on("end", () => {
+            setTimeout(() => {
+                playingMessage.delete().catch();
+            }, 3000);
         }
+        );
+    }
+
+    private createButtonsComponents(): ActionRowBuilder<ButtonBuilder> {
+        const row = new ActionRowBuilder<ButtonBuilder>();
+        const buttonNext = CommandsProvider.createButtonComponent('next', ButtonStyle.Secondary, `${Emojis.Music.next}`)
+        const buttonPlayPause = CommandsProvider.createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.playpause}`)
+        const buttonLoop = CommandsProvider.createButtonComponent('loop', ButtonStyle.Secondary, `${Emojis.Music.loop}`)
+        const buttonShuffle = CommandsProvider.createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`)
+        const buttonStop = CommandsProvider.createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`)
+
+
+        row.addComponents(buttonPlayPause, buttonNext, buttonLoop, buttonShuffle, buttonStop);
+        return row;
     }
 
 }

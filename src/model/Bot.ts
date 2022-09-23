@@ -37,7 +37,7 @@ export class Bot {
             const command: CommandImport = await import(MappingDirectories.pathResolve(path, file));
             if (command.default.active) {
                 this.commands.set(command.default.name, command.default);
-                this.groups.set(command.default.group, { commandName: command.default.name, groupName: command.default.group });
+                this.groups.set(command.default.group.toLowerCase(), { commandName: command.default.name, groupName: command.default.group });
             }
         }
     }

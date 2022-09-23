@@ -30,7 +30,7 @@ const help: iCommand = {
 
                 await message.reply({ embeds: [embed] }).catch(console.error);
             } else {
-                const group = bot.groups.get(args[0]);
+                const group = bot.groups.find((group, key) => key.includes(args[0].toLowerCase()));
                 if (!group) throw new CommandsInternalError(`Commands groups not found: ${args[0]}`);
 
                 const commands = bot.commands.map(command => {

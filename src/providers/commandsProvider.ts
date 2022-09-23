@@ -81,10 +81,10 @@ export class CommandsProvider {
      * @param buttonStyle 
      * @returns ButtonBuilder
      */
-    static createButtonComponent(option: string, buttonStyle: ButtonStyle): ButtonBuilder {
+    static createButtonComponent(option: string, buttonStyle: ButtonStyle, label?: string): ButtonBuilder {
         const button = new ButtonBuilder();
         button.setCustomId(option);
-        button.setLabel(option);
+        label ? button.setLabel(label) : button.setLabel(option);
         button.setStyle(buttonStyle);
 
         return button;

@@ -5,8 +5,9 @@ import ytdl from 'ytdl-core-discord';
 import { videoInfo } from 'ytdl-core';
 import { createAudioResource, StreamType } from "@discordjs/voice";
 import internal from "stream";
-import { APIEmbed, MessagePayload } from "discord.js";
+import { Message } from "discord.js";
 import { EmbedBuilder } from "@discordjs/builders";
+import config from "@src/utils/config";
 
 export class Song {
     public readonly url;
@@ -21,7 +22,7 @@ export class Song {
         this.thumb = thumb;
     }
 
-    public static async songFrom(url = "", search = ""): Promise<iSongData> {
+    public static async songFrom(url = "", search = ""): Promise<Song> {
         const isYoutubeUrl = ytVideoPattern.test(url);
 
         let songInfo: videoInfo | Video;
@@ -29,23 +30,23 @@ export class Song {
         if (isYoutubeUrl) {
             songInfo = await ytdl.getInfo(url);
 
-            return {
+            return new this({
                 url: songInfo.videoDetails.video_url,
                 title: songInfo.videoDetails.title,
-                duration: parseInt(songInfo.videoDetails.lengthSeconds),
+                duration: songInfo.videoDetails.lengthSeconds,
                 thumb: songInfo.thumbnail_url
-            };
+            });
         } else {
             const result = await YouTube.searchOne(search);
 
             songInfo = await ytdl.getInfo(`https://youtube.com/watch?v=${result.id}`);
 
-            return {
+            return new this({
                 url: songInfo.videoDetails.video_url,
                 title: songInfo.videoDetails.title,
-                duration: parseInt(songInfo.videoDetails.lengthSeconds),
-                thumb: songInfo.thumbnail_url
-            };
+                duration: songInfo.videoDetails.lengthSeconds,
+                thumb: songInfo.tag_for_children_directed
+            });
         }
     }
 
@@ -68,8 +69,24 @@ export class Song {
         });
     }
 
-    public embedMessage(): EmbedBuilder{
-        const playingEmbed = new EmbedBuilder(); 
+    public embedMessage(message: Message): EmbedBuilder {
+        const playingEmbed = new EmbedBuilder();
+
+        playingEmbed.setAuthor({
+            name: config.general.BOT_NAME,
+            iconURL: 'http://pm1.narvii.com/7613/ab57b8bb348c4c57901780afc219620136fbe953r1-346-346v2_00.jpg',
+            url: config.general.INVITE_LINK
+        });
+
+        playingEmbed.setTitle(this.title);
+        playingEmbed.setURL(this.url);
+        playingEmbed.setThumbnail(this.thumb);
+        playingEmbed.setDescription(this.duration);
+
+        playingEmbed.setFooter({
+            text: `Requested by : ${message.author.username}#${message.author.discriminator}`,
+            iconURL: `${message.author.avatarURL()}`
+        });
         return playingEmbed;
     }
 }

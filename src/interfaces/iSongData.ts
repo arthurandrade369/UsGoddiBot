@@ -1,6 +1,6 @@
 export interface iSongData{
     title: string;
     url: string;
-    duration: number;
+    duration: string;
     thumb: string;
 }
