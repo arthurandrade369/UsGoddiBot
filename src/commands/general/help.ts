@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
 import { bot } from '@src/index';
-import { CommandsProvider } from '@src/providers/commandsProvider';
+import { getEmbed } from '@src/providers/commandsProvider';
 import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
 import { Groups } from "@src/providers/groups";
 
@@ -17,7 +17,7 @@ const help: iCommand = {
     async execute(message: Message, args: string[]): Promise<void> {
         try {
             if (!args.length) {
-                const embed = CommandsProvider.getEmbed(message, 'Lista de Comandos por grupos', 'Tente !help [grupo]');
+                const embed = getEmbed(message, 'Lista de Comandos por grupos', 'Tente !help [grupo]');
                 bot.groups.forEach(group => {
                     const commands = getArrayFromCommandCollection(group.groupName);
                     const command = getStringFromArrayOfCommands(commands);
@@ -39,7 +39,7 @@ const help: iCommand = {
                     return undefined
                 });
 
-                const embed = CommandsProvider.getEmbed(message, `\`${group.groupName}\``);
+                const embed = getEmbed(message, `\`${group.groupName}\``);
 
                 commands.forEach(command => {
                     if (!command) return;

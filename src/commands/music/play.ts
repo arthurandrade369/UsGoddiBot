@@ -4,11 +4,11 @@ import { iCommand } from "@src/interfaces/iCommand";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
 import { Groups } from "@src/providers/groups";
 import { Message } from 'discord.js';
-import { SongQueue } from '../../model/SongQueue';
+import { SongQueue } from '@src/model/SongQueue';
 import { bot } from '@src/index';
 import { Song } from '@src/model/Song';
-import { CommandsProvider } from '@src/providers/commandsProvider';
-import { join } from 'path';
+import { EmbedBuilder } from '@discordjs/builders';
+import { getSongEmbedMessage } from '@src/providers/songsProvider';
 
 const play: iCommand = {
     name: 'play',
@@ -39,11 +39,11 @@ const play: iCommand = {
             }
             if (!song) throw new CommandsInternalError('Musica nao encontrada');
 
-            const queuedEmbed = CommandsProvider.getEmbed(message, `Adicionado ${song.title} a queue`);
 
             if (queue) {
                 queue.enqueue(song);
 
+                const queuedEmbed = getSongEmbedMessage(message, song, 'QUEUE');
                 return message.reply({ embeds: [queuedEmbed] });
             }
 
@@ -58,7 +58,9 @@ const play: iCommand = {
 
             bot.queue.set(message.guild!.id, newQueue);
 
+            const queuedEmbed = getSongEmbedMessage(message, song, 'QUEUE');
             newQueue.enqueue(song);
+            return message.reply({ embeds: [queuedEmbed] });
         } catch (error) {
             if (error instanceof CommandsCallError) error.sendResponse();
             if (error instanceof CommandsInternalError) error.logError();

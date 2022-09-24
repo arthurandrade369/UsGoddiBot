@@ -8,18 +8,14 @@ import {
     VoiceConnectionStatus,
     VoiceConnectionDisconnectReason,
     entersState,
-    AudioPlayerState,
     AudioPlayerPlayingState
 } from '@discordjs/voice';
 import {
     ActionRowBuilder,
     ButtonBuilder,
-    ButtonComponent,
     ButtonStyle,
-    Interaction,
     Message,
     TextChannel,
-    User,
     ComponentType,
     ButtonInteraction,
     CacheType
@@ -28,9 +24,10 @@ import { iQueueArgs } from '../interfaces/iQueueArgs';
 import { Song } from '@src/model/Song';
 import config from '@src/utils/config';
 import { promisify } from 'util';
-import { CommandsProvider } from '@src/providers/commandsProvider'
 import { Emojis } from '@src/providers/emojis';
 import { bot } from '@src/index';
+import { createButtonComponent } from '@src/providers/commandsProvider';
+import { GuildMember } from 'discord.js';
 
 const wait = promisify(setTimeout);
 
@@ -174,6 +171,7 @@ export class SongQueue {
                 case 'playpause':
                     if (!(interacted.user.id !== this.message.author.id)) {
                         interacted.reply({ content: 'Essa musica não foi pedida por voce', ephemeral: true });
+                        return;
                     }
 
                     if (this.player.state.status === AudioPlayerStatus.Playing) {
@@ -184,8 +182,11 @@ export class SongQueue {
 
                     break;
 
-                case 'next':
-
+                case 'skip':
+                    if (!(interacted.user.id !== this.message.author.id)) {
+                        interacted.reply({ content: 'Essa musica não foi pedida por voce', ephemeral: true });
+                    }
+                    await this.bot.commands.get("skip")!.execute(this.message);
                     break;
 
                 case 'loop':
@@ -220,15 +221,20 @@ export class SongQueue {
 
     private createButtonsComponents(): ActionRowBuilder<ButtonBuilder> {
         const row = new ActionRowBuilder<ButtonBuilder>();
-        const buttonNext = CommandsProvider.createButtonComponent('next', ButtonStyle.Secondary, `${Emojis.Music.next}`)
-        const buttonPlayPause = CommandsProvider.createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.playpause}`)
-        const buttonLoop = CommandsProvider.createButtonComponent('loop', ButtonStyle.Secondary, `${Emojis.Music.loop}`)
-        const buttonShuffle = CommandsProvider.createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`)
-        const buttonStop = CommandsProvider.createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`)
+        const buttonNext = createButtonComponent('skip', ButtonStyle.Secondary, `${Emojis.Music.next}`)
+        const buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.playpause}`)
+        const buttonLoop = createButtonComponent('loop', ButtonStyle.Secondary, `${Emojis.Music.loop}`)
+        const buttonShuffle = createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`)
+        const buttonStop = createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`)
 
 
         row.addComponents(buttonPlayPause, buttonNext, buttonLoop, buttonShuffle, buttonStop);
         return row;
+    }
+
+    static canModifyQueue(member: GuildMember): boolean {
+
+        return true;
     }
 
 }

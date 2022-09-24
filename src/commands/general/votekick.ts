@@ -1,6 +1,6 @@
 import { iCommand } from "@src/interfaces/iCommand";
 import { Message, ButtonStyle, GuildMember, Collection, ComponentType, User } from 'discord.js';
-import { CommandsProvider } from '@src/providers/commandsProvider';
+import { createPollYesNo, getEmbed, getMembersById } from '@src/providers/commandsProvider';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
 import { Groups } from "@src/providers/groups";
@@ -33,11 +33,11 @@ const votekick: iCommand = {
             const guild = message.guild;
             if (!guild?.available) throw new CommandsInternalError('Guild unvailable or unexists');
 
-            const memberToKick = CommandsProvider.getMembersById(guild, args).shift();
+            const memberToKick = getMembersById(guild, args).shift();
             if (!memberToKick) throw new CommandsCallError(message, 'Membro não existe');
             if (!memberToKick.kickable) throw new CommandsCallError(message, 'Esse usuário não pode ser kickado')
 
-            const embedMessage = CommandsProvider.createPollYesNo(message,
+            const embedMessage = createPollYesNo(message,
                 [{
                     name: `${memberToKick.user.username}#${memberToKick.user.discriminator} merece ser kickado?`,
                     value: 'Vote com os botões abaixo'
@@ -85,7 +85,7 @@ export default votekick;
 async function updateEmbed(message: Message, originalMessageAuthor: User, embedMessage: iEmbedReturn, memberToKick: GuildMember, poll: PollResult): Promise<void> {
     const memberDiscriminator = `${memberToKick.user.username}#${memberToKick.user.discriminator}`;
 
-    const embed = CommandsProvider.getEmbed(message, 'Votação Finalizada');
+    const embed = getEmbed(message, 'Votação Finalizada');
 
     embed.setFooter(
         {

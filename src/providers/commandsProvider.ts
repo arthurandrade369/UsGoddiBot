@@ -3,121 +3,120 @@ import config from '@src/utils/config';
 import { iSeparatorReturn } from '@src/interfaces/iSeparatorReturn';
 import { iEmbedReturn } from '@src/interfaces/iEmbedReturn';
 
-export class CommandsProvider {
 
-    /**
-     * Separate the command itself of the trigger
-     * 
-     * @param command 
-     * @returns iSeparatorReturn
-     */
-    static separateTrigger(command: string): iSeparatorReturn | void {
-        const args = command.slice(config.general.TRIGGER.length).trim().split(/ +/g);
-        const cmd = args.shift()?.toLowerCase();
 
-        if (!cmd) return;
+/**
+ * Separate the command itself of the trigger
+ * 
+ * @param command 
+ * @returns iSeparatorReturn
+ */
+export const separateTrigger = (command: string): iSeparatorReturn | void => {
+    const args = command.slice(config.general.TRIGGER.length).trim().split(/ +/g);
+    const cmd = args.shift()?.toLowerCase();
 
-        return {
-            command: cmd,
-            args: args
-        };
-    }
+    if (!cmd) return;
 
-    /**
-     * Create a custom embed
-     * 
-     * @param title 
-     * @param description 
-     * @returns EmbedBuilder
-     */
-    static getEmbed(message: Message, title: string, description?: string): EmbedBuilder {
-        const embed = new EmbedBuilder()
-            .setColor('DarkBlue');
+    return {
+        command: cmd,
+        args: args
+    };
+}
 
-        embed.setAuthor({
-            name: config.general.BOT_NAME,
-            iconURL: 'http://pm1.narvii.com/7613/ab57b8bb348c4c57901780afc219620136fbe953r1-346-346v2_00.jpg',
-            url: config.general.INVITE_LINK
-        });
+/**
+ * Create a custom embed
+ * 
+ * @param title 
+ * @param description 
+ * @returns EmbedBuilder
+ */
+export const getEmbed = (message: Message, title: string, description?: string): EmbedBuilder => {
+    const embed = new EmbedBuilder()
+        .setColor('DarkBlue');
 
-        // embed.setThumbnail('https://pbs.twimg.com/profile_images/1215734764323377152/-hmYx6ee_400x400.jpg');
-        embed.setTitle(title);
-        embed.setFooter({
-            text: `Requested by : ${message.author.username}#${message.author.discriminator}`,
-            iconURL: `${message.author.avatarURL()}`
-        });
-        if (description) embed.setDescription(description);
+    embed.setAuthor({
+        name: config.general.BOT_NAME,
+        iconURL: 'http://pm1.narvii.com/7613/ab57b8bb348c4c57901780afc219620136fbe953r1-346-346v2_00.jpg',
+        url: config.general.INVITE_LINK
+    });
 
-        return embed;
-    }
+    // embed.setThumbnail('https://pbs.twimg.com/profile_images/1215734764323377152/-hmYx6ee_400x400.jpg');
+    embed.setTitle(title);
+    embed.setFooter({
+        text: `Requested by : ${message.author.username}#${message.author.discriminator}`,
+        iconURL: `${message.author.avatarURL()}`
+    });
+    if (description) embed.setDescription(description);
 
-    static normalizeId(id: string): string {
-        return id.replace(/(<|@|!|&|#|>)/g, '');
-    }
+    return embed;
+}
 
-    /**
-     * Search for one or many members by id
-     * 
-     * @param guild 
-     * @param membersId 
-     * @returns GuildMember[] | null
-     */
-    static getMembersById(guild: Guild, membersId: string[]): (GuildMember | null)[] {
-        const membersIdClean = membersId.map((id) => {
-            return this.normalizeId(id);
-        });
+export const normalizeId = (id: string): string => {
+    return id.replace(/(<|@|!|&|#|>)/g, '');
+}
 
-        const members = membersIdClean.map((id) => {
-            return guild.members.resolve(id);
-        })
+/**
+ * Search for one or many members by id
+ * 
+ * @param guild 
+ * @param membersId 
+ * @returns GuildMember[] | null
+ */
+export const getMembersById = (guild: Guild, membersId: string[]): (GuildMember | null)[] => {
+    const membersIdClean = membersId.map((id) => {
+        return normalizeId(id);
+    });
 
-        return members;
-    }
+    const members = membersIdClean.map((id) => {
+        return guild.members.resolve(id);
+    })
 
-    /**
-     * Create a button
-     * 
-     * @param option 
-     * @param buttonStyle 
-     * @returns ButtonBuilder
-     */
-    static createButtonComponent(option: string, buttonStyle: ButtonStyle, label?: string): ButtonBuilder {
-        const button = new ButtonBuilder();
-        button.setCustomId(option);
-        label ? button.setLabel(label) : button.setLabel(option);
-        button.setStyle(buttonStyle);
+    return members;
+}
 
-        return button;
-    }
+/**
+ * Create a button
+ * 
+ * @param option 
+ * @param buttonStyle 
+ * @returns ButtonBuilder
+ */
+export const createButtonComponent = (option: string, buttonStyle: ButtonStyle, label?: string): ButtonBuilder => {
+    const button = new ButtonBuilder();
+    button.setCustomId(option);
+    label ? button.setLabel(label) : button.setLabel(option);
+    button.setStyle(buttonStyle);
 
-    /**
-     * Create a embed to made a poll
-     * 
-     * @param message 
-     * @param args 
-     */
-    static createPoll(message: Message, args: string[]): iEmbedReturn {
-        const embed = CommandsProvider.getEmbed(message, 'Votação iniciada', 'Clique para votar');
-        const row = new ActionRowBuilder<ButtonBuilder>();
+    return button;
+}
 
-        args.forEach((option) => {
-            const button = CommandsProvider.createButtonComponent(option, ButtonStyle.Secondary);
-            row.addComponents(button);
-        })
+/**
+ * Create a embed to made a poll
+ * 
+ * @param message 
+ * @param args 
+ */
+export const createPoll = (message: Message, args: string[]): iEmbedReturn => {
+    const embed = getEmbed(message, 'Votação iniciada', 'Clique para votar');
+    const row = new ActionRowBuilder<ButtonBuilder>();
 
-        return { embed: embed, row: row };
-    }
+    args.forEach((option) => {
+        const button = createButtonComponent(option, ButtonStyle.Secondary);
+        row.addComponents(button);
+    })
 
-    static createPollYesNo(message: Message, fields: APIEmbedField[]): iEmbedReturn {
-        const embed = CommandsProvider.getEmbed(message, 'Votação iniciada');
-        const row = new ActionRowBuilder<ButtonBuilder>();
+    return { embed: embed, row: row };
+}
 
-        embed.addFields(fields);
-        const buttonYes = CommandsProvider.createButtonComponent('Sim', ButtonStyle.Success);
-        const buttonNo = CommandsProvider.createButtonComponent('Não', ButtonStyle.Danger);
-        row.addComponents(buttonYes);
-        row.addComponents(buttonNo);
+export const createPollYesNo = (message: Message, fields: APIEmbedField[]): iEmbedReturn => {
+    const embed = getEmbed(message, 'Votação iniciada');
+    const row = new ActionRowBuilder<ButtonBuilder>();
 
-        return { embed: embed, row: row };
-    }
+    embed.addFields(fields);
+    const buttonYes = createButtonComponent('Sim', ButtonStyle.Success);
+    const buttonNo = createButtonComponent('Não', ButtonStyle.Danger);
+    row.addComponents(buttonYes);
+    row.addComponents(buttonNo);
+
+    return { embed: embed, row: row };
 }

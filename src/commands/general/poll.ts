@@ -1,6 +1,6 @@
 import { iCommand } from "@src/interfaces/iCommand";
 import { Message } from 'discord.js';
-import { CommandsProvider } from '@src/providers/commandsProvider';
+import { createPoll } from '@src/providers/commandsProvider';
 import { Groups } from "@src/providers/groups";
 
 const poll: iCommand = {
@@ -25,7 +25,7 @@ const poll: iCommand = {
             return;
         }
 
-        CommandsProvider.createPoll(message, args);
+        createPoll(message, args);
     },
 }
 

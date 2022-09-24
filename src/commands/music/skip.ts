@@ -1,4 +1,6 @@
+import { bot } from "@src/index";
 import { iCommand } from "@src/interfaces/iCommand";
+import { SongQueue } from "@src/model/SongQueue";
 import { Groups } from "@src/providers/groups";
 import { Message } from "discord.js";
 
@@ -9,9 +11,17 @@ const skip: iCommand = {
     aliases: [],
     permission: ['everyone'],
     cooldown: undefined,
-    active: false,
-    async execute(message: Message, args: string[]): Promise<void> {
-        
+    active: true,
+    async execute(message: Message, args: string[]): Promise<Message<boolean> | void> {
+        const queue = bot.queue.get(message.guild!.id);
+
+        if (!SongQueue.canModifyQueue(message.member!)) return message.reply('Você não está no mesmo canal que o player');
+
+        if (!queue) return;
+
+        queue.player.stop()
+
+        return message.reply('Player parado');
     },
 }
 

@@ -3,7 +3,7 @@ import { Collection, Client, ActivityType, Message, Snowflake } from 'discord.js
 import type { iCommand } from '@src/interfaces/iCommand';
 import config from '@src/utils/config';
 import { MappingDirectories } from '@src/utils/mappingDirectories';
-import { CommandsProvider } from '@src/providers/commandsProvider';
+import { separateTrigger } from '@src/providers/commandsProvider';
 import { SongQueue } from '@src/model/SongQueue';
 
 export class Bot {
@@ -47,7 +47,7 @@ export class Bot {
             if (message.author.bot) return;
             if (!message.content.startsWith(config.general.TRIGGER)) return;
 
-            const content = CommandsProvider.separateTrigger(message.content);
+            const content = separateTrigger(message.content);
             if (!content) return;
 
             const command = this.commands.get(content.command) ?? this.commands.find((cmd) => cmd.aliases?.includes(content.command));

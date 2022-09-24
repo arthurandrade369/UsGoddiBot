@@ -1,6 +1,6 @@
 import type { Message } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
-import { CommandsProvider } from '@src/providers/commandsProvider';
+import { getMembersById } from '@src/providers/commandsProvider';
 import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
 import { Groups } from '@src/providers/groups';
 
@@ -21,7 +21,7 @@ const avatar: iCommand = {
 
             if (guild == null || !guild.available) throw new CommandsInternalError('Guild unavailable or unexists');
 
-            const members = CommandsProvider.getMembersById(guild, args);
+            const members = getMembersById(guild, args);
 
             const avatar = members.map((member) => {
                 if (!member) throw new CommandsCallError(message, 'Membro não existe')

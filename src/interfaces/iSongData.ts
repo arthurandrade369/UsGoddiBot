@@ -3,4 +3,5 @@ export interface iSongData{
     url: string;
     duration: string;
     thumb: string;
+    artist: string;
 }

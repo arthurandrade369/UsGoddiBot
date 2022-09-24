@@ -7,19 +7,21 @@ import { createAudioResource, StreamType } from "@discordjs/voice";
 import internal from "stream";
 import { Message } from "discord.js";
 import { EmbedBuilder } from "@discordjs/builders";
-import config from "@src/utils/config";
+import { getSongEmbedMessage } from "@src/providers/songsProvider";
 
 export class Song {
     public readonly url;
     public readonly title;
     public readonly duration;
     public readonly thumb;
+    public readonly artist;
 
-    constructor({ url, title, duration, thumb }: iSongData) {
+    constructor({ url, title, duration, thumb, artist }: iSongData) {
         this.url = url;
         this.title = title;
         this.duration = duration;
         this.thumb = thumb;
+        this.artist = artist;
     }
 
     public static async songFrom(url = "", search = ""): Promise<Song> {
@@ -34,7 +36,8 @@ export class Song {
                 url: songInfo.videoDetails.video_url,
                 title: songInfo.videoDetails.title,
                 duration: songInfo.videoDetails.lengthSeconds,
-                thumb: songInfo.thumbnail_url
+                thumb: songInfo.thumbnail_url,
+                artist: songInfo.videoDetails.author.name
             });
         } else {
             const result = await YouTube.searchOne(search);
@@ -45,7 +48,8 @@ export class Song {
                 url: songInfo.videoDetails.video_url,
                 title: songInfo.videoDetails.title,
                 duration: songInfo.videoDetails.lengthSeconds,
-                thumb: songInfo.tag_for_children_directed
+                thumb: songInfo.thumbnail_url,
+                artist: songInfo.videoDetails.author.name
             });
         }
     }
@@ -70,23 +74,6 @@ export class Song {
     }
 
     public embedMessage(message: Message): EmbedBuilder {
-        const playingEmbed = new EmbedBuilder();
-
-        playingEmbed.setAuthor({
-            name: config.general.BOT_NAME,
-            iconURL: 'http://pm1.narvii.com/7613/ab57b8bb348c4c57901780afc219620136fbe953r1-346-346v2_00.jpg',
-            url: config.general.INVITE_LINK
-        });
-
-        playingEmbed.setTitle(this.title);
-        playingEmbed.setURL(this.url);
-        playingEmbed.setThumbnail(this.thumb);
-        playingEmbed.setDescription(this.duration);
-
-        playingEmbed.setFooter({
-            text: `Requested by : ${message.author.username}#${message.author.discriminator}`,
-            iconURL: `${message.author.avatarURL()}`
-        });
-        return playingEmbed;
+        return getSongEmbedMessage(message, this, 'PLAYING');
     }
 }
