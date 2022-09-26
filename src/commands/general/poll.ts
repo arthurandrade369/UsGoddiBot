@@ -1,6 +1,6 @@
 import { iCommand } from "@src/interfaces/iCommand";
 import { Message } from 'discord.js';
-import { createPoll } from '@src/providers/commandsProvider';
+import { createPoll } from '@src/providers/embedProvider';
 import { Groups } from "@src/providers/groups";
 
 const poll: iCommand = {

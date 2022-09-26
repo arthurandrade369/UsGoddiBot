@@ -18,7 +18,8 @@ import {
     TextChannel,
     ComponentType,
     ButtonInteraction,
-    CacheType
+    CacheType,
+    VoiceBasedChannel
 } from 'discord.js';
 import { iQueueArgs } from '../interfaces/iQueueArgs';
 import { Song } from '@src/model/Song';
@@ -26,7 +27,7 @@ import config from '@src/utils/config';
 import { promisify } from 'util';
 import { Emojis } from '@src/providers/emojis';
 import { bot } from '@src/index';
-import { createButtonComponent } from '@src/providers/commandsProvider';
+import { createButtonComponent } from '@src/providers/embedProvider';
 import { GuildMember } from 'discord.js';
 
 const wait = promisify(setTimeout);
@@ -38,14 +39,16 @@ export class SongQueue {
     public readonly textChannel: TextChannel;
     public readonly bot = bot;
 
+    static voiceChannel: VoiceBasedChannel;
     public resource?: AudioResource;
     public songs: Song[] = [];
     public loop = false;
     public waitTimeout: NodeJS.Timeout | undefined;
 
-    constructor(options: iQueueArgs) {
+    constructor(options: iQueueArgs, voiceChannel: VoiceBasedChannel) {
         this.message = options.message;
         this.connection = options.connection;
+        SongQueue.voiceChannel = voiceChannel;
 
         this.textChannel = this.message.channel as TextChannel;
         this.player = createAudioPlayer({
@@ -232,9 +235,31 @@ export class SongQueue {
         return row;
     }
 
-    static canModifyQueue(member: GuildMember): boolean {
+    static async canModifyQueue(message: Message): Promise<Message<boolean> | void> {
+        if (!(message.member!.voice.channel!.id === this.voiceChannel.id)) {
+            return message.reply('❌  **|Você não está no mesmo canal que o Bot**');
+        };
 
-        return true;
+        return;
+    }
+
+    private modifySendedEmbed(message: Message, pressedButton: string) {
+        switch (pressedButton) {
+            case 'PLAY':
+
+                break;
+
+            case 'PAUSE':
+
+                break;
+
+            case 'LOOP':
+
+                break;
+
+            default:
+                break;
+        }
     }
 
 }

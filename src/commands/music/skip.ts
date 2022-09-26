@@ -15,7 +15,7 @@ const skip: iCommand = {
     async execute(message: Message, args: string[]): Promise<Message<boolean> | void> {
         const queue = bot.queue.get(message.guild!.id);
 
-        if (!SongQueue.canModifyQueue(message.member!)) return message.reply('Você não está no mesmo canal que o player');
+        if (await SongQueue.canModifyQueue(message)) return;
 
         if (!queue) return;
 

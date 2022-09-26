@@ -16,10 +16,10 @@ const resume: iCommand = {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
-        if (!SongQueue.canModifyQueue(message.member!)) return message.reply('Você não está no mesmo canal que o player');
+        if (await SongQueue.canModifyQueue(message)) return;
 
         if (queue.player.unpause()) {
-            return message.reply('Player resumido');
+            return message.reply(' **Player resumido** ');
         }
 
         return;

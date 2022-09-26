@@ -20,11 +20,11 @@ const play: iCommand = {
     active: true,
     async execute(message: Message, music: string[]): Promise<Message<boolean> | void> {
         try {
-            const VoiceChannel = message.member?.voice.channel;
-            if (!VoiceChannel) throw new CommandsCallError(message, 'Você não está em um canal de voz');
+            const voiceChannel = message.member?.voice.channel;
+            if (!voiceChannel) throw new CommandsCallError(message, 'Você não está em um canal de voz');
 
             const queue = bot.queue.get(message.guild!.id);
-            if (queue && VoiceChannel.id !== queue.connection.joinConfig.channelId) {
+            if (queue && voiceChannel.id !== queue.connection.joinConfig.channelId) {
                 return message.reply('Você precisa estar no mesmo canal que o Bot').catch(console.error);
             }
             if (!music.length) return message.reply('Tente !help music').catch(console.error);
@@ -50,11 +50,11 @@ const play: iCommand = {
             const newQueue = new SongQueue({
                 message: message,
                 connection: joinVoiceChannel({
-                    channelId: VoiceChannel.id,
+                    channelId: voiceChannel.id,
                     guildId: message.guild!.id,
                     adapterCreator: message.guild!.voiceAdapterCreator,
                 })
-            })
+            }, voiceChannel)
 
             bot.queue.set(message.guild!.id, newQueue);
 

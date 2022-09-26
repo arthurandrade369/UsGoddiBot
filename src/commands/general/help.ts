@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 import type { iCommand } from '@src/interfaces/iCommand';
 import { bot } from '@src/index';
-import { getEmbed } from '@src/providers/commandsProvider';
+import { getEmbed } from '@src/providers/embedProvider';
 import { CommandsCallError, CommandsInternalError } from '@src/model/CommandsError';
 import { Groups } from "@src/providers/groups";
 

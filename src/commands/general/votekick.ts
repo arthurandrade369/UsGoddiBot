@@ -1,6 +1,7 @@
 import { iCommand } from "@src/interfaces/iCommand";
 import { Message, ButtonStyle, GuildMember, Collection, ComponentType, User } from 'discord.js';
-import { createPollYesNo, getEmbed, getMembersById } from '@src/providers/commandsProvider';
+import { getMembersById } from '@src/providers/commandsProvider';
+import { createPollYesNo, getEmbed } from '@src/providers/embedProvider';
 import { iEmbedReturn } from "@src/interfaces/iEmbedReturn";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
 import { Groups } from "@src/providers/groups";

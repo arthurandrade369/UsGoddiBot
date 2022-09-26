@@ -9,5 +9,7 @@ export const Emojis = {
         shuffle: '🔀',
         loop: '🔁',
         stop: '⏹',
+        play: '▶',
+        pause: '⏸'
     }
 }

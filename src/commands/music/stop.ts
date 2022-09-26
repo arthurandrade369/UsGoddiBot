@@ -16,7 +16,7 @@ const stop: iCommand = {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
-        if (!SongQueue.canModifyQueue(message.member!)) return message.reply('Você não está no mesmo canal que o player');
+        if (await SongQueue.canModifyQueue(message)) return;
 
         queue.stop()
 
