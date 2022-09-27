@@ -14,10 +14,10 @@ const skip: iCommand = {
     active: true,
     async execute(message: Message, args: string[]): Promise<Message<boolean> | void> {
         const queue = bot.queue.get(message.guild!.id);
-
-        if (await SongQueue.canModifyQueue(message)) return;
-
         if (!queue) return;
+
+        if (!await SongQueue.canModifyQueue(message)) return;
+
 
         queue.player.stop()
 

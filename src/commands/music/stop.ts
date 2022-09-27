@@ -16,7 +16,7 @@ const stop: iCommand = {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
-        if (await SongQueue.canModifyQueue(message)) return;
+        if (!await SongQueue.canModifyQueue(message)) return;
 
         queue.stop()
 

@@ -28,7 +28,7 @@ import { promisify } from 'util';
 import { Emojis } from '@src/providers/emojis';
 import { bot } from '@src/index';
 import { createButtonComponent } from '@src/providers/embedProvider';
-import { GuildMember } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 const wait = promisify(setTimeout);
 
@@ -160,7 +160,13 @@ export class SongQueue {
         const song = (newState.resource as AudioResource<Song>).metadata;
 
         let buttonsComponent = this.createButtonsComponents();
-        const playingMessage = await this.textChannel.send({ embeds: [song.embedMessage(this.message)], components: [buttonsComponent] });
+
+        const embed = {
+            embeds: [song.embedMessage(this.message)],
+            components: [buttonsComponent]
+        }
+
+        const playingMessage = await this.textChannel.send(embed);
 
         const filter = (interaction: ButtonInteraction<CacheType>) => interaction.user.id !== this.textChannel.client.user!.id;
         const collector = playingMessage.createMessageComponentCollector({
@@ -223,28 +229,20 @@ export class SongQueue {
     }
 
     private createButtonsComponents(): ActionRowBuilder<ButtonBuilder> {
-        const row = new ActionRowBuilder<ButtonBuilder>();
-        const buttonNext = createButtonComponent('skip', ButtonStyle.Secondary, `${Emojis.Music.next}`)
-        const buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.playpause}`)
-        const buttonLoop = createButtonComponent('loop', ButtonStyle.Secondary, `${Emojis.Music.loop}`)
+        const buttonNext = createButtonComponent('skip', ButtonStyle.Secondary, `${Emojis.Music.next}`);
+        const buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.pause}`)
+        const buttonLoop = createButtonComponent('loop', ButtonStyle.Danger, `${Emojis.Music.loop}`)
         const buttonShuffle = createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`)
         const buttonStop = createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`)
-
+        const row = new ActionRowBuilder<ButtonBuilder>();
 
         row.addComponents(buttonPlayPause, buttonNext, buttonLoop, buttonShuffle, buttonStop);
         return row;
     }
 
-    static async canModifyQueue(message: Message): Promise<Message<boolean> | void> {
-        if (!(message.member!.voice.channel!.id === this.voiceChannel.id)) {
-            return message.reply('❌  **|Você não está no mesmo canal que o Bot**');
-        };
 
-        return;
-    }
-
-    private modifySendedEmbed(message: Message, pressedButton: string) {
-        switch (pressedButton) {
+    private modifySendedEmbedByButtonPressed(message: Message, typeButton: string, embed: EmbedBuilder) {
+        switch (typeButton) {
             case 'PLAY':
 
                 break;
@@ -262,4 +260,11 @@ export class SongQueue {
         }
     }
 
+    static async canModifyQueue(message: Message): Promise<Message<boolean> | void> {
+        if (!(message.member!.voice.channel!.id === this.voiceChannel.id)) {
+            return message.reply('❌  **|Você não está no mesmo canal que o Bot**');
+        };
+
+        return;
+    }
 }
