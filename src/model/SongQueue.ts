@@ -161,7 +161,7 @@ export class SongQueue {
 
         let buttonsComponent = this.createButtonsComponents();
 
-        const embed = {
+        let embed = {
             embeds: [song.embedMessage(this.message)],
             components: [buttonsComponent]
         }
@@ -178,39 +178,32 @@ export class SongQueue {
         collector.on('collect', async (interacted) => {
             switch (interacted.customId) {
                 case 'playpause':
-                    if (!(interacted.user.id !== this.message.author.id)) {
-                        interacted.reply({ content: 'Essa musica não foi pedida por voce', ephemeral: true });
-                        return;
-                    }
-
                     if (this.player.state.status === AudioPlayerStatus.Playing) {
                         await this.bot.commands.get("pause")!.execute(this.message);
+                        embed.components = [this.modifySendedEmbedByButtonPressed()];
+                        playingMessage.edit(embed);
                     } else {
                         await this.bot.commands.get("resume")!.execute(this.message);
+                        embed.components = [this.modifySendedEmbedByButtonPressed()];
+                        playingMessage.edit(embed);
                     }
-
                     break;
 
                 case 'skip':
-                    if (!(interacted.user.id !== this.message.author.id)) {
-                        interacted.reply({ content: 'Essa musica não foi pedida por voce', ephemeral: true });
-                    }
                     await this.bot.commands.get("skip")!.execute(this.message);
                     break;
 
                 case 'loop':
-
+                    await this.bot.commands.get("loop")!.execute(this.message);
+                    embed.components = [this.modifySendedEmbedByButtonPressed()];
+                    playingMessage.edit(embed);
                     break;
 
                 case 'shuffle':
-
+                    await this.bot.commands.get("shuffles")!.execute(this.message);
                     break;
 
                 case 'stop':
-                    if (!(interacted.user.id !== this.message.author.id)) {
-                        interacted.reply({ content: 'Essa musica não foi pedida por voce', ephemeral: true });
-                    }
-
                     await this.bot.commands.get("stop")!.execute(this.message);
                     collector.stop();
                     break;
@@ -230,34 +223,39 @@ export class SongQueue {
 
     private createButtonsComponents(): ActionRowBuilder<ButtonBuilder> {
         const buttonNext = createButtonComponent('skip', ButtonStyle.Secondary, `${Emojis.Music.next}`);
-        const buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.pause}`)
-        const buttonLoop = createButtonComponent('loop', ButtonStyle.Danger, `${Emojis.Music.loop}`)
-        const buttonShuffle = createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`)
-        const buttonStop = createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`)
+        const buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.pause}`);
+        const buttonLoop = createButtonComponent('loop', ButtonStyle.Danger, `${Emojis.Music.loop}`);
+        const buttonShuffle = createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`);
+        const buttonStop = createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`);
         const row = new ActionRowBuilder<ButtonBuilder>();
 
         row.addComponents(buttonPlayPause, buttonNext, buttonLoop, buttonShuffle, buttonStop);
         return row;
     }
 
+    private modifySendedEmbedByButtonPressed(): ActionRowBuilder<ButtonBuilder> {
+        let buttonPlayPause;
+        let buttonLoop;
 
-    private modifySendedEmbedByButtonPressed(message: Message, typeButton: string, embed: EmbedBuilder) {
-        switch (typeButton) {
-            case 'PLAY':
-
-                break;
-
-            case 'PAUSE':
-
-                break;
-
-            case 'LOOP':
-
-                break;
-
-            default:
-                break;
+        if (this.player.state.status == AudioPlayerStatus.Playing) {
+            buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.pause}`);
+        } else {
+            buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.play}`);
         }
+
+        if (this.loop) {
+            buttonLoop = createButtonComponent('pause', ButtonStyle.Success, `${Emojis.Music.loop}`)
+        } else {
+            buttonLoop = createButtonComponent('pause', ButtonStyle.Danger, `${Emojis.Music.loop}`)
+        }
+        const buttonNext = createButtonComponent('skip', ButtonStyle.Secondary, `${Emojis.Music.next}`);
+        const buttonShuffle = createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`);
+        const buttonStop = createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`);
+
+        const row = new ActionRowBuilder<ButtonBuilder>();
+
+        row.addComponents(buttonPlayPause, buttonNext, buttonLoop, buttonShuffle, buttonStop);
+        return row;
     }
 
     static async canModifyQueue(message: Message): Promise<Message<boolean> | void> {
