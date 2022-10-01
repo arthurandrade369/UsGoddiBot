@@ -4,7 +4,7 @@ import { Message } from "discord.js";
 
 const lyrics: iCommand = {
     name: 'lyrics',
-    description: '',
+    description: 'Envia a letra da musica atual',
     group: Groups.music,
     aliases: [],
     permission: ['everyone'],

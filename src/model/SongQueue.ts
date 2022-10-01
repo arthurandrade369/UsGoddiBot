@@ -180,32 +180,36 @@ export class SongQueue {
                 case 'playpause':
                     if (this.player.state.status === AudioPlayerStatus.Playing) {
                         await this.bot.commands.get("pause")!.execute(this.message);
-                        embed.components = [this.modifySendedEmbedByButtonPressed()];
-                        playingMessage.edit(embed);
+                        playingMessage.edit({ embeds: embed.embeds, components: [this.modifySendedEmbedByButtonPressed()] });
+                        await interacted.deferUpdate();
                     } else {
                         await this.bot.commands.get("resume")!.execute(this.message);
-                        embed.components = [this.modifySendedEmbedByButtonPressed()];
-                        playingMessage.edit(embed);
+                        playingMessage.edit({ embeds: embed.embeds, components: [this.modifySendedEmbedByButtonPressed()] });
+                        await interacted.deferUpdate();
                     }
                     break;
 
                 case 'skip':
                     await this.bot.commands.get("skip")!.execute(this.message);
+                    await interacted.deferUpdate();
+                    // playingMessage.delete();
                     break;
 
                 case 'loop':
                     await this.bot.commands.get("loop")!.execute(this.message);
-                    embed.components = [this.modifySendedEmbedByButtonPressed()];
-                    playingMessage.edit(embed);
+                    playingMessage.edit({ embeds: embed.embeds, components: [this.modifySendedEmbedByButtonPressed()] });
+                    await interacted.deferUpdate();
                     break;
 
                 case 'shuffle':
-                    await this.bot.commands.get("shuffles")!.execute(this.message);
+                    await this.bot.commands.get("shuffle")!.execute(this.message);
+                    await interacted.deferUpdate();
                     break;
 
                 case 'stop':
                     await this.bot.commands.get("stop")!.execute(this.message);
                     collector.stop();
+                    await interacted.deferUpdate();
                     break;
 
                 default:
@@ -224,9 +228,14 @@ export class SongQueue {
     private createButtonsComponents(): ActionRowBuilder<ButtonBuilder> {
         const buttonNext = createButtonComponent('skip', ButtonStyle.Secondary, `${Emojis.Music.next}`);
         const buttonPlayPause = createButtonComponent('playpause', ButtonStyle.Secondary, `${Emojis.Music.pause}`);
-        const buttonLoop = createButtonComponent('loop', ButtonStyle.Danger, `${Emojis.Music.loop}`);
         const buttonShuffle = createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`);
         const buttonStop = createButtonComponent('stop', ButtonStyle.Secondary, `${Emojis.Music.stop}`);
+        let buttonLoop;
+        if (this.loop) {
+            buttonLoop = createButtonComponent('loop', ButtonStyle.Success, `${Emojis.Music.loop}`)
+        } else {
+            buttonLoop = createButtonComponent('loop', ButtonStyle.Danger, `${Emojis.Music.loop}`)
+        }
         const row = new ActionRowBuilder<ButtonBuilder>();
 
         row.addComponents(buttonPlayPause, buttonNext, buttonLoop, buttonShuffle, buttonStop);
@@ -244,9 +253,9 @@ export class SongQueue {
         }
 
         if (this.loop) {
-            buttonLoop = createButtonComponent('pause', ButtonStyle.Success, `${Emojis.Music.loop}`)
+            buttonLoop = createButtonComponent('loop', ButtonStyle.Success, `${Emojis.Music.loop}`)
         } else {
-            buttonLoop = createButtonComponent('pause', ButtonStyle.Danger, `${Emojis.Music.loop}`)
+            buttonLoop = createButtonComponent('loop', ButtonStyle.Danger, `${Emojis.Music.loop}`)
         }
         const buttonNext = createButtonComponent('skip', ButtonStyle.Secondary, `${Emojis.Music.next}`);
         const buttonShuffle = createButtonComponent('shuffle', ButtonStyle.Secondary, `${Emojis.Music.shuffle}`);
@@ -258,11 +267,8 @@ export class SongQueue {
         return row;
     }
 
-    static async canModifyQueue(message: Message): Promise<Message<boolean> | void> {
-        if (!(message.member!.voice.channel!.id === this.voiceChannel.id)) {
-            return message.reply('❌  **|Você não está no mesmo canal que o Bot**');
-        };
-
-        return;
+    static canModifyQueue(message: Message): boolean {
+        if (message.member!.voice.channelId !== bot.queue.get(message.guild!.id)!.connection.joinConfig.channelId) return false;
+        return true;
     }
 }

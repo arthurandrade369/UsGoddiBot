@@ -4,7 +4,7 @@ import { Message } from "discord.js";
 
 const queue: iCommand = {
     name: 'queue',
-    description: '',
+    description: 'Envia informações sobre a queue',
     group: Groups.music,
     aliases: ['q'],
     permission: ['everyone'],

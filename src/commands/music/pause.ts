@@ -16,10 +16,10 @@ const pause: iCommand = {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
-        if (!await SongQueue.canModifyQueue(message)) return;
+        if (!SongQueue.canModifyQueue(message)) return message.channel.send('❌  **|Você não está no mesmo canal que o Bot**');
 
         if (queue.player.pause()) {
-            return message.reply(' **Player pausado** ');
+            return message.channel.send('Pausado...');
         }
         return;
     },

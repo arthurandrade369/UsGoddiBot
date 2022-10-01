@@ -58,8 +58,8 @@ const play: iCommand = {
 
             bot.queue.set(message.guild!.id, newQueue);
 
-            const queuedEmbed = getSongEmbedMessage(message, song, 'QUEUE');
             newQueue.enqueue(song);
+            const queuedEmbed = getSongEmbedMessage(message, song, 'QUEUE');
             return message.reply({ embeds: [queuedEmbed] });
         } catch (error) {
             if (error instanceof CommandsCallError) error.sendResponse();

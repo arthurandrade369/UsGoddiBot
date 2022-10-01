@@ -16,11 +16,11 @@ const stop: iCommand = {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
-        if (!await SongQueue.canModifyQueue(message)) return;
+        if (!SongQueue.canModifyQueue(message)) return message.channel.send('❌  **|Você não está no mesmo canal que o Bot**');
 
         queue.stop()
 
-        return message.reply('Player parado');
+        return message.channel.send('Saindo...');
     },
 }
 

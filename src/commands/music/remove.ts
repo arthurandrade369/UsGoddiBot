@@ -4,7 +4,7 @@ import { Message } from "discord.js";
 
 const remove: iCommand = {
     name: 'remove',
-    description: '',
+    description: 'Remove uma musica da queue',
     group: Groups.music,
     aliases: ['rm'],
     permission: ['everyone'],

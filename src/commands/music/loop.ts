@@ -16,10 +16,10 @@ const loop: iCommand = {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
-        if (!await SongQueue.canModifyQueue(message)) return;
+        if (!SongQueue.canModifyQueue(message)) return message.channel.send('❌  **|Você não está no mesmo canal que o Bot**');
 
-        queue.loop = true;
-        message.channel.send(' **Loop ativado** ');
+        queue.loop = queue.loop ? false : true;
+        return message.channel.send('Loop...');
     },
 }
 

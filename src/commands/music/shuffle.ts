@@ -6,17 +6,17 @@ import { Message } from "discord.js";
 
 const shuffle: iCommand = {
     name: 'shuffle',
-    description: 'Embaralha a queue',
+    description: 'Embaralha as musicas na queue',
     group: Groups.music,
     aliases: [],
     permission: ['everyone'],
     cooldown: undefined,
     active: true,
-    async execute(message: Message, args: string[]): Promise<void> {
+    async execute(message: Message, args: string[]): Promise<void | Message<boolean>> {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
-        if (!await SongQueue.canModifyQueue(message)) return;
+        if (!SongQueue.canModifyQueue(message)) return message.channel.send('❌  **|Você não está no mesmo canal que o Bot**');
 
         const songs = queue.songs;
 
@@ -25,7 +25,7 @@ const shuffle: iCommand = {
             [songs[i], songs[j]] = [songs[j], songs[i]];
         }
 
-        message.channel.send(' **Queue embaralhada** ');
+        return message.channel.send('Embaralhando...');
     },
 }
 

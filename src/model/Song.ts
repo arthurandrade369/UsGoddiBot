@@ -28,27 +28,29 @@ export class Song {
         const isYoutubeUrl = ytVideoPattern.test(url);
 
         let songInfo: videoInfo | Video;
-
+        let thumb;
         if (isYoutubeUrl) {
             songInfo = await ytdl.getInfo(url);
+            thumb = `https://i.ytimg.com/vi/${songInfo.videoDetails.videoId}/maxresdefault.jpg`;
 
             return new this({
                 url: songInfo.videoDetails.video_url,
                 title: songInfo.videoDetails.title,
                 duration: songInfo.videoDetails.lengthSeconds,
-                thumb: songInfo.thumbnail_url,
+                thumb: thumb,
                 artist: songInfo.videoDetails.author.name
             });
         } else {
             const result = await YouTube.searchOne(search);
 
             songInfo = await ytdl.getInfo(`https://youtube.com/watch?v=${result.id}`);
+            thumb = `https://i.ytimg.com/vi/${songInfo.videoDetails.videoId}/maxresdefault.jpg`;
 
             return new this({
                 url: songInfo.videoDetails.video_url,
                 title: songInfo.videoDetails.title,
                 duration: songInfo.videoDetails.lengthSeconds,
-                thumb: songInfo.thumbnail_url,
+                thumb: thumb,
                 artist: songInfo.videoDetails.author.name
             });
         }
