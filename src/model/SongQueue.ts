@@ -19,7 +19,8 @@ import {
     ComponentType,
     ButtonInteraction,
     CacheType,
-    VoiceBasedChannel
+    VoiceBasedChannel,
+    GuildMember
 } from 'discord.js';
 import { iQueueArgs } from '../interfaces/iQueueArgs';
 import { Song } from '@src/model/Song';
@@ -176,6 +177,10 @@ export class SongQueue {
         });
 
         collector.on('collect', async (interacted) => {
+            if (SongQueue.canModifyQueue(this.message, interacted.member as GuildMember)) {
+                interacted.reply({ ephemeral: true, content: '❌  **|Você não está no mesmo canal que o Bot**' });
+                return;
+            }
             switch (interacted.customId) {
                 case 'playpause':
                     if (this.player.state.status === AudioPlayerStatus.Playing) {
@@ -267,8 +272,13 @@ export class SongQueue {
         return row;
     }
 
-    static canModifyQueue(message: Message): boolean {
-        if (message.member!.voice.channelId !== bot.queue.get(message.guild!.id)!.connection.joinConfig.channelId) return false;
-        return true;
+    static canModifyQueue(message: Message, member?: GuildMember): boolean {
+        if (member) {
+            if (member.voice.channelId !== bot.queue.get(message.guild!.id)!.connection.joinConfig.channelId) return false;
+            return true;
+        } else {
+            if (message.member!.voice.channelId !== bot.queue.get(message.guild!.id)!.connection.joinConfig.channelId) return false;
+            return true;
+        }
     }
 }
