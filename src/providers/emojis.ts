@@ -1,6 +1,7 @@
 export const Emojis = {
     General: {
         bot: '🤖',
+        clock: '🕔',
     },
     Music: {
         music: '🎶',
@@ -10,6 +11,7 @@ export const Emojis = {
         loop: '🔁',
         stop: '⏹',
         play: '▶️',
-        pause: '⏸'
+        pause: '⏸',
+        queue: '⏯',
     }
 }

@@ -7,14 +7,15 @@ import { createAudioResource, StreamType } from "@discordjs/voice";
 import internal from "stream";
 import { Message } from "discord.js";
 import { EmbedBuilder } from "@discordjs/builders";
-import { getSongEmbedMessage } from "@src/providers/songsProvider";
+import { SongsProvider } from '../providers/songsProvider';
 
 export class Song {
-    public readonly url;
-    public readonly title;
-    public readonly duration;
-    public readonly thumb;
-    public readonly artist;
+    public readonly url: string;
+    public readonly title: string;
+    public readonly duration: string;
+    public readonly thumb: string;
+    public readonly artist: string;
+    public songsProvider: SongsProvider;
 
     constructor({ url, title, duration, thumb, artist }: iSongData) {
         this.url = url;
@@ -22,6 +23,7 @@ export class Song {
         this.duration = duration;
         this.thumb = thumb;
         this.artist = artist;
+        this.songsProvider = new SongsProvider();
     }
 
     public static async songFrom(url = "", search = ""): Promise<Song> {
@@ -76,6 +78,6 @@ export class Song {
     }
 
     public embedMessage(message: Message): EmbedBuilder {
-        return getSongEmbedMessage(message, this, 'PLAYING');
+        return this.songsProvider.getSongEmbedMessage(message, this, 'PLAYING');
     }
 }

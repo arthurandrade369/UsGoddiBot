@@ -7,8 +7,7 @@ import { Message } from 'discord.js';
 import { SongQueue } from '@src/model/SongQueue';
 import { bot } from '@src/index';
 import { Song } from '@src/model/Song';
-import { EmbedBuilder } from '@discordjs/builders';
-import { getSongEmbedMessage } from '@src/providers/songsProvider';
+import { SongsProvider } from '@src/providers/songsProvider';
 
 const play: iCommand = {
     name: 'play',
@@ -20,6 +19,7 @@ const play: iCommand = {
     active: true,
     async execute(message: Message, music: string[]): Promise<Message<boolean> | void> {
         try {
+            const songProvider = new SongsProvider();
             const voiceChannel = message.member?.voice.channel;
             if (!voiceChannel) throw new CommandsCallError(message, 'Você não está em um canal de voz');
 
@@ -43,7 +43,7 @@ const play: iCommand = {
             if (queue) {
                 queue.enqueue(song);
 
-                const queuedEmbed = getSongEmbedMessage(message, song, 'QUEUE');
+                const queuedEmbed = songProvider.getSongEmbedMessage(message, song, 'QUEUE');
                 return message.reply({ embeds: [queuedEmbed] });
             }
 
@@ -59,7 +59,7 @@ const play: iCommand = {
             bot.queue.set(message.guild!.id, newQueue);
 
             newQueue.enqueue(song);
-            const queuedEmbed = getSongEmbedMessage(message, song, 'QUEUE');
+            const queuedEmbed = songProvider.getSongEmbedMessage(message, song, 'QUEUE');
             return message.reply({ embeds: [queuedEmbed] });
         } catch (error) {
             if (error instanceof CommandsCallError) error.sendResponse();

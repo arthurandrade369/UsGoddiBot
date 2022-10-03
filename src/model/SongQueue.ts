@@ -124,7 +124,9 @@ export class SongQueue {
         this.player.stop();
 
         this.waitTimeout = setTimeout(() => {
-            this.connection.destroy();
+            if (this.connection.state.status !== VoiceConnectionStatus.Destroyed) {
+                this.connection.destroy();
+            }
             bot.queue.delete(this.message.guild!.id)
             this.textChannel.send("Queue reached the end, leaving channel");
         }, config.voice.STAY_TIME * 60000)
@@ -177,7 +179,7 @@ export class SongQueue {
         });
 
         collector.on('collect', async (interacted) => {
-            if (SongQueue.canModifyQueue(this.message, interacted.member as GuildMember)) {
+            if (!SongQueue.canModifyQueue(this.message, interacted.member as GuildMember)) {
                 interacted.reply({ ephemeral: true, content: '❌  **|Você não está no mesmo canal que o Bot**' });
                 return;
             }

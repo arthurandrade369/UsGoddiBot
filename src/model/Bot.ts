@@ -5,6 +5,7 @@ import config from '@src/utils/config';
 import { MappingDirectories } from '@src/utils/mappingDirectories';
 import { separateTrigger } from '@src/providers/commandsProvider';
 import { SongQueue } from '@src/model/SongQueue';
+import { iGroupData } from '@src/interfaces/iGroupData';
 
 export class Bot {
     public commands = new Collection<string, iCommand>();
@@ -55,9 +56,4 @@ export class Bot {
             if (command.active) await command.execute(message, content.args);
         })
     }
-}
-
-type iGroupData = {
-    commandName: string;
-    groupName: string;
 }

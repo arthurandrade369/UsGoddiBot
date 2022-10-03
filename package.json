@@ -10,7 +10,7 @@
     "build:start": "yarn build && node dist/index.js",
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
-    "dev": "tsnd --transpile-only --clear --inspect -- src/index.ts"
+    "dev": "tsnd --respawn --transpile-only --clear --inspect -- src/index.ts"
   },
   "devDependencies": {
     "@types/module-alias": "^2.0.1",
