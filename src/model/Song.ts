@@ -5,7 +5,7 @@ import ytdl from 'ytdl-core-discord';
 import { videoInfo } from 'ytdl-core';
 import { createAudioResource, StreamType } from "@discordjs/voice";
 import internal from "stream";
-import { Message } from "discord.js";
+import { Message, GuildMember } from 'discord.js';
 import { EmbedBuilder } from "@discordjs/builders";
 import { SongsProvider } from '../providers/songsProvider';
 
@@ -15,18 +15,20 @@ export class Song {
     public readonly duration: string;
     public readonly thumb: string;
     public readonly artist: string;
+    public readonly member: GuildMember;
     public songsProvider: SongsProvider;
 
-    constructor({ url, title, duration, thumb, artist }: iSongData) {
+    constructor({ url, title, duration, thumb, artist, member }: iSongData) {
         this.url = url;
         this.title = title;
         this.duration = duration;
         this.thumb = thumb;
         this.artist = artist;
+        this.member = member;
         this.songsProvider = new SongsProvider();
     }
 
-    public static async songFrom(url = "", search = ""): Promise<Song> {
+    public static async songFrom(url = "", search = "", member: GuildMember): Promise<Song> {
         const isYoutubeUrl = ytVideoPattern.test(url);
 
         let songInfo: videoInfo | Video;
@@ -40,7 +42,8 @@ export class Song {
                 title: songInfo.videoDetails.title,
                 duration: songInfo.videoDetails.lengthSeconds,
                 thumb: thumb,
-                artist: songInfo.videoDetails.author.name
+                artist: songInfo.videoDetails.author.name,
+                member: member,
             });
         } else {
             const result = await YouTube.searchOne(search);
@@ -53,7 +56,8 @@ export class Song {
                 title: songInfo.videoDetails.title,
                 duration: songInfo.videoDetails.lengthSeconds,
                 thumb: thumb,
-                artist: songInfo.videoDetails.author.name
+                artist: songInfo.videoDetails.author.name,
+                member: member,
             });
         }
     }

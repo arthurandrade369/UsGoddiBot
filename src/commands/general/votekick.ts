@@ -50,13 +50,13 @@ const votekick: iCommand = {
 
             collector.on('collect', interacted => {
                 voted.set(interacted.user.id, interacted.customId);
-                interacted.reply({ content: `Você votou ${interacted.customId}`, ephemeral: true });
+                interacted.deferUpdate();
 
                 setTimeout(() => {
                     collector.stop('timed out')
                 }, 10000);
             });
-            collector.on('end', () => {
+            collector.on('end', async () => {
                 voted.forEach((vote) => {
                     switch (vote) {
                         case 'Sim':
@@ -70,7 +70,7 @@ const votekick: iCommand = {
                     }
                 })
                 if (poll.yes > poll.no) {
-                    memberToKick.kick('Popular poll');
+                    await memberToKick.kick('Popular poll');
                 }
                 updateEmbed(response, message.author, embedMessage, memberToKick, poll);
             })

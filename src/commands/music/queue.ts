@@ -6,6 +6,7 @@ import { Groups } from "@src/providers/groups";
 import { SongsProvider } from "@src/providers/songsProvider";
 import { Message, EmbedBuilder } from 'discord.js';
 import { Song } from '../../model/Song';
+import { SongQueue } from '../../model/SongQueue';
 
 const queue: iCommand = {
     name: 'queue',
@@ -20,39 +21,52 @@ const queue: iCommand = {
         if (!queue) return;
 
         let currentPage = 0;
-        const embeds = getEmbedQueueMessage(message, queue.songs);
+        const embeds = getEmbedQueueMessage(message, queue);
 
         const embedQueue = await message.reply({
             content: `**Pagina atual - ${currentPage + 1}/${embeds.length}**`,
             embeds: [embeds[currentPage]]
         });
+
+        embedQueue.createMessageComponentCollector();
     },
 }
 
 export default queue;
 
-function getEmbedQueueMessage(message: Message, songs: Song[]): EmbedBuilder[] {
+function getEmbedQueueMessage(message: Message, queue: SongQueue): EmbedBuilder[] {
     let embedQueue: EmbedBuilder[] = [];
     let songPagination = 10;
     let playlistDuration = 0;
     const songsProvider = new SongsProvider();
 
-    for (let actualSongs = 1; actualSongs <= songs.length; actualSongs += 10) {
-        songs.forEach((track) => { playlistDuration += parseInt(track.duration); })
-        const currentSong = songs.slice(actualSongs, songPagination);
+    for (let actualSongs = 1; actualSongs <= queue.songs.length; actualSongs += 10) {
+        queue.songs.forEach((track) => { playlistDuration += parseInt(track.duration); })
+        const currentSong = queue.songs.slice(actualSongs, songPagination);
         let nextSongs = actualSongs;
         songPagination += 10;
 
-        const info = currentSong.map((track) => `${++nextSongs} - [${track.title}](${track.url}) [${songsProvider.getDuration(track.duration)}]`)
+        const info = currentSong.map((track) => { return track });
 
         const embed = getEmbed(message, `${Emojis.Music.queue} Queue de Reprodução`,
-            `**Música atual - [${songs[0].title}](${songs[0].url})**\n\n${info}\n`)
-            .setThumbnail(songs[0].thumb)
+            `**Música atual - [${queue.songs[0].title}](${queue.songs[0].url})**`)
+            .setThumbnail(queue.songs[0].thumb)
             .setTimestamp();
 
+        info.forEach((track) => {
+            embed.addFields({
+                name: `${++nextSongs} - ${track.title} - \`[${songsProvider.getDuration(track.duration)}]\``,
+                value: `Pedido por: <@${track.member.id}>`,
+            });
+        });
         embed.addFields({
             name: `**${Emojis.General.clock} Duração total**`,
             value: `\`${songsProvider.getDuration(playlistDuration.toString())}\``,
+            inline: true
+        });
+        embed.addFields({
+            name: `**${Emojis.Music.loop} Loop**`,
+            value: `\`${queue.loop ? `${Emojis.General.active} Ativado` : `${Emojis.General.inactive} Desativado`}\``,
             inline: true
         });
         embedQueue.push(embed);

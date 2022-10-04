@@ -1,4 +1,3 @@
-
 import { joinVoiceChannel } from '@discordjs/voice';
 import { iCommand } from "@src/interfaces/iCommand";
 import { CommandsCallError, CommandsInternalError } from "@src/model/CommandsError";
@@ -33,12 +32,11 @@ const play: iCommand = {
             let song;
 
             try {
-                song = await Song.songFrom(url, music.join(" "));
+                song = await Song.songFrom(url, music.join(" "), message.member);
             } catch (error) {
                 console.error(error);
             }
             if (!song) throw new CommandsInternalError('Musica nao encontrada');
-
 
             if (queue) {
                 queue.enqueue(song);
