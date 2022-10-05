@@ -19,7 +19,6 @@ export const getEmbed = (message: Message, title: string, description?: string):
         url: config.general.INVITE_LINK
     });
 
-    // embed.setThumbnail('https://pbs.twimg.com/profile_images/1215734764323377152/-hmYx6ee_400x400.jpg');
     embed.setTitle(title);
     embed.setFooter({
         text: `Requested by : ${message.author.username}#${message.author.discriminator}`,

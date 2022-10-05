@@ -28,11 +28,10 @@ const play: iCommand = {
             }
             if (!music.length) return message.reply('Tente !help music').catch(console.error);
 
-            const url = music.toString();
             let song;
 
             try {
-                song = await Song.songFrom(url, music.join(" "), message.member);
+                song = await Song.songFrom(music.toString(), music.join(" "), message.member);
             } catch (error) {
                 console.error(error);
             }

@@ -128,7 +128,7 @@ export class SongQueue {
                 this.connection.destroy();
             }
             bot.queue.delete(this.message.guild!.id)
-            this.textChannel.send("Queue reached the end, leaving channel");
+            this.textChannel.send("**Queue chegou ao fim, saindo do canal**");
         }, config.voice.STAY_TIME * 60000)
     }
 
@@ -142,7 +142,7 @@ export class SongQueue {
     public async processQueue(): Promise<void> {
         if (this.player.state.status !== AudioPlayerStatus.Idle) return;
 
-        if (!this.songs.length) return this.stop();
+        if (!this.songs.length) return;
 
         const next = this.songs[0];
 
@@ -199,7 +199,6 @@ export class SongQueue {
                 case 'skip':
                     await this.bot.commands.get("skip")!.execute(this.message);
                     await interacted.deferUpdate();
-                    // playingMessage.delete();
                     break;
 
                 case 'loop':

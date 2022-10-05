@@ -15,5 +15,10 @@ export const Emojis = {
         play: '▶️',
         pause: '⏸',
         queue: '⏯',
+    },
+    Queue: {
+        previous: '⬅',
+        next: '➡',
+        stop: '⏹',
     }
 }
