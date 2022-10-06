@@ -11,17 +11,17 @@ import { ActionRowBuilder, APIEmbedField, ButtonBuilder, ButtonStyle, EmbedBuild
  */
 export const getEmbed = (message: Message, title: string, description?: string): EmbedBuilder => {
     const embed = new EmbedBuilder()
-        .setColor('DarkBlue');
+        .setColor("DarkBlue");
 
     embed.setAuthor({
         name: config.general.BOT_NAME,
-        iconURL: 'http://pm1.narvii.com/7613/ab57b8bb348c4c57901780afc219620136fbe953r1-346-346v2_00.jpg',
+        iconURL: config.bot.iconUrl,
         url: config.general.INVITE_LINK
     });
 
     embed.setTitle(title);
     embed.setFooter({
-        text: `Requested by : ${message.author.username}#${message.author.discriminator}`,
+        text: `Pedido por: ${message.author.username}#${message.author.discriminator}`,
         iconURL: `${message.author.avatarURL()}`
     });
     if (description) embed.setDescription(description);

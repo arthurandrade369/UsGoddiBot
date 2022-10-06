@@ -90,7 +90,7 @@ async function updateEmbed(message: Message, originalMessageAuthor: User, embedM
 
     embed.setFooter(
         {
-            text: `Requested by : ${originalMessageAuthor.username}#${originalMessageAuthor.discriminator}`,
+            text: `Pedido por: ${originalMessageAuthor.username}#${originalMessageAuthor.discriminator}`,
             iconURL: `${originalMessageAuthor.avatarURL()}`
         });
 

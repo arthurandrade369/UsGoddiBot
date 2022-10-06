@@ -12,14 +12,14 @@ const loop: iCommand = {
     permission: ['everyone'],
     cooldown: undefined,
     active: true,
-    async execute(message: Message, args: string[]): Promise<Message<boolean> | void> {
+    async execute(message: Message): Promise<Message<boolean> | void> {
         const queue = bot.queue.get(message.guild!.id);
         if (!queue) return;
 
         if (!SongQueue.canModifyQueue(message)) return message.channel.send('❌  **|Você não está no mesmo canal que o Bot**');
 
         queue.loop = queue.loop ? false : true;
-        return message.channel.send('Loop...');
+        return message.channel.send('**Loop ativado...**');
     },
 }
 

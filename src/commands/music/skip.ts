@@ -12,8 +12,9 @@ const skip: iCommand = {
     permission: ['everyone'],
     cooldown: undefined,
     active: true,
-    async execute(message: Message, args: string[]): Promise<Message<boolean> | void> {
-        const queue = bot.queue.get(message.guild!.id);
+    async execute(message: Message): Promise<Message<boolean> | void> {
+        if (!message.guild) return;
+        const queue = bot.queue.get(message.guild.id);
         if (!queue) return;
 
         if (!SongQueue.canModifyQueue(message)) return message.channel.send('❌  **|Você não está no mesmo canal que o Bot**');

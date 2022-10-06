@@ -17,8 +17,8 @@ export const Emojis = {
         queue: '⏯',
     },
     Queue: {
-        previous: '⬅',
-        next: '➡',
+        previous: '⏪',
+        next: '⏩',
         stop: '⏹',
     }
 }

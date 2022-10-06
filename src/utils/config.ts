@@ -1,5 +1,9 @@
 import 'dotenv/config';
 export default {
+    bot:{
+        iconUrl: 'http://pm1.narvii.com/7613/ab57b8bb348c4c57901780afc219620136fbe953r1-346-346v2_00.jpg',
+        embedColor: 'DarkBlue',
+    },
     general: {
         TOKEN: process.env['TOKEN'],
         BOT_NAME: 'UsGoddi',

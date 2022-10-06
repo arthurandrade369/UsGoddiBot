@@ -13,7 +13,8 @@ const shuffle: iCommand = {
     cooldown: undefined,
     active: true,
     async execute(message: Message, args: string[]): Promise<void | Message<boolean>> {
-        const queue = bot.queue.get(message.guild!.id);
+        if (!message.guild) return;
+        const queue = bot.queue.get(message.guild.id);
         if (!queue) return;
 
         if (!SongQueue.canModifyQueue(message)) return message.channel.send('❌  **|Você não está no mesmo canal que o Bot**');
@@ -21,7 +22,7 @@ const shuffle: iCommand = {
         const songs = queue.songs;
 
         for (let i = songs.length - 1; i > 1; i--) {
-            let j = 1 + Math.floor(Math.random() * i);
+            const j = 1 + Math.floor(Math.random() * i);
             [songs[i], songs[j]] = [songs[j], songs[i]];
         }
 

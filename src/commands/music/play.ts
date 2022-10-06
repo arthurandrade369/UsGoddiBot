@@ -21,8 +21,9 @@ const play: iCommand = {
             const songProvider = new SongsProvider();
             const voiceChannel = message.member?.voice.channel;
             if (!voiceChannel) throw new CommandsCallError(message, 'Você não está em um canal de voz');
+            if (!message.guild) return;
 
-            const queue = bot.queue.get(message.guild!.id);
+            const queue = bot.queue.get(message.guild.id);
             if (queue && voiceChannel.id !== queue.connection.joinConfig.channelId) {
                 return message.reply('Você precisa estar no mesmo canal que o Bot').catch(console.error);
             }
@@ -31,7 +32,7 @@ const play: iCommand = {
             let song;
 
             try {
-                song = await Song.songFrom(music.toString(), music.join(" "), message.member);
+                song = await Song.getSong(music.toString(), music.join(" "), message.member);
             } catch (error) {
                 console.error(error);
             }
@@ -48,12 +49,12 @@ const play: iCommand = {
                 message: message,
                 connection: joinVoiceChannel({
                     channelId: voiceChannel.id,
-                    guildId: message.guild!.id,
-                    adapterCreator: message.guild!.voiceAdapterCreator,
+                    guildId: message.guild.id,
+                    adapterCreator: message.guild.voiceAdapterCreator,
                 })
-            }, voiceChannel)
+            }, voiceChannel);
 
-            bot.queue.set(message.guild!.id, newQueue);
+            bot.queue.set(message.guild.id, newQueue);
 
             newQueue.enqueue(song);
             const queuedEmbed = songProvider.getSongEmbedMessage(message, song, 'QUEUE');

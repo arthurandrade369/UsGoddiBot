@@ -3,7 +3,7 @@ import { ytVideoPattern } from "@src/providers/patternRegex";
 import { Video, YouTube } from "youtube-sr";
 import ytdl from 'ytdl-core-discord';
 import { videoInfo } from 'ytdl-core';
-import { createAudioResource, StreamType } from "@discordjs/voice";
+import { AudioResource, createAudioResource, StreamType } from "@discordjs/voice";
 import internal from "stream";
 import { Message, GuildMember } from 'discord.js';
 import { EmbedBuilder } from "@discordjs/builders";
@@ -28,7 +28,7 @@ export class Song {
         this.songsProvider = new SongsProvider();
     }
 
-    public static async songFrom(url = "", search = "", member: GuildMember): Promise<Song> {
+    public static async getSong(url = "", search = "", member: GuildMember): Promise<Song> {
         const isYoutubeUrl = ytVideoPattern.test(url);
 
         let songInfo: videoInfo | Video;
@@ -62,7 +62,14 @@ export class Song {
         }
     }
 
-    public async makeResource() {
+    public static async searchSong(search = ""): Promise<Video[]> {
+        const result = await YouTube.search(search, { type: 'video', limit: 5 });
+
+        if (!result) throw new Error('No videos found');
+        return result;
+    }
+
+    public async makeResource(): Promise<AudioResource | undefined> {
         let stream: internal.Readable | undefined;
 
         const type = this.url.includes("youtube.com") ? StreamType.Opus : StreamType.OggOpus;

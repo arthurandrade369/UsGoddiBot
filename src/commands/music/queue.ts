@@ -4,9 +4,8 @@ import { createButtonComponent, getEmbed } from "@src/providers/embedProvider";
 import { Emojis } from "@src/providers/emojis";
 import { Groups } from "@src/providers/groups";
 import { SongsProvider } from "@src/providers/songsProvider";
-import { Message, EmbedBuilder, ButtonStyle, ActionRowBuilder, ButtonBuilder, User, ButtonInteraction, CacheType, ComponentType } from 'discord.js';
-import { Song } from '../../model/Song';
-import { SongQueue } from '../../model/SongQueue';
+import { Message, EmbedBuilder, ButtonStyle, ActionRowBuilder, ButtonBuilder, ComponentType } from 'discord.js';
+import { SongQueue } from '@src/model/SongQueue';
 
 const queue: iCommand = {
     name: 'queue',
@@ -17,7 +16,8 @@ const queue: iCommand = {
     cooldown: undefined,
     active: true,
     async execute(message: Message, args: string[]): Promise<void> {
-        const queue = bot.queue.get(message.guild!.id);
+        if (!message.guild) return;
+        const queue = bot.queue.get(message.guild.id);
         if (!queue) return;
 
         let currentPage = 0;
@@ -37,7 +37,7 @@ const queue: iCommand = {
                     ephemeral: true,
                     content: 'Apenas quem requisitou pode alterar a queue',
                 })
-            };
+            }
 
             switch (interected.customId) {
                 case 'previous':
@@ -80,7 +80,7 @@ const queue: iCommand = {
 export default queue;
 
 function getEmbedQueueMessage(message: Message, queue: SongQueue): EmbedBuilder[] {
-    let embedQueue: EmbedBuilder[] = [];
+    const embedQueue: EmbedBuilder[] = [];
     let songPagination = 10;
     const songsProvider = new SongsProvider();
     let playlistDuration = 0;
@@ -120,8 +120,8 @@ function getEmbedQueueMessage(message: Message, queue: SongQueue): EmbedBuilder[
 }
 
 function getButtonsQueueMessage(): ActionRowBuilder<ButtonBuilder> {
-    const previous = createButtonComponent('previous', ButtonStyle.Primary, Emojis.Queue.previous);
-    const next = createButtonComponent('next', ButtonStyle.Primary, Emojis.Queue.next);
+    const previous = createButtonComponent('previous', ButtonStyle.Secondary, Emojis.Queue.previous);
+    const next = createButtonComponent('next', ButtonStyle.Secondary, Emojis.Queue.next);
     const stop = createButtonComponent('stop', ButtonStyle.Secondary, Emojis.Queue.stop);
     const row = new ActionRowBuilder<ButtonBuilder>;
 

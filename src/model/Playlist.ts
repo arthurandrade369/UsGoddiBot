@@ -27,7 +27,7 @@ export class Playlist {
             });
     }
 
-    public static async from(url = "", search = "", member: GuildMember) {
+    public static async getPlaylist(url = "", search = "", member: GuildMember) {
         const urlValid = ytPlaylistPattern.test(url);
         let playlist;
 

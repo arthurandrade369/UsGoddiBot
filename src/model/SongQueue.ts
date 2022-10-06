@@ -22,14 +22,13 @@ import {
     VoiceBasedChannel,
     GuildMember
 } from 'discord.js';
-import { iQueueArgs } from '../interfaces/iQueueArgs';
+import { iQueueArgs } from '@src/interfaces/iQueueArgs';
 import { Song } from '@src/model/Song';
 import config from '@src/utils/config';
 import { promisify } from 'util';
 import { Emojis } from '@src/providers/emojis';
 import { bot } from '@src/index';
 import { createButtonComponent } from '@src/providers/embedProvider';
-import { EmbedBuilder } from 'discord.js';
 
 const wait = promisify(setTimeout);
 
@@ -81,7 +80,9 @@ export class SongQueue {
                     if (this.connection.state.status !== VoiceConnectionStatus.Destroyed) {
                         try {
                             this.connection.destroy();
-                        } catch (error) { }
+                        } catch (error) {
+                            console.error(error);
+                        }
                     }
                 }
             }
@@ -162,9 +163,9 @@ export class SongQueue {
     private async sendPlayingEmbed(newState: AudioPlayerPlayingState): Promise<void> {
         const song = (newState.resource as AudioResource<Song>).metadata;
 
-        let buttonsComponent = this.createButtonsComponents();
+        const buttonsComponent = this.createButtonsComponents();
 
-        let embed = {
+        const embed = {
             embeds: [song.embedMessage(this.message)],
             components: [buttonsComponent]
         }

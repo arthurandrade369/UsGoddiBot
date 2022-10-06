@@ -10,7 +10,7 @@ import { Playlist } from '../../model/Playlist';
 
 const playlist: iCommand = {
     name: 'playlist',
-    description: 'Adiciona uma playlist inteira à queue. Tente \`!playlist https://youtube.com/playlist?list=PLBB13F295B0C02A30\`',
+    description: 'Adiciona uma playlist inteira à queue. Tente `!playlist https://youtube.com/playlist?list=PLBB13F295B0C02A30`',
     group: Groups.music,
     aliases: ['pl'],
     permission: ['everyone'],
@@ -21,13 +21,14 @@ const playlist: iCommand = {
             const songProvider = new SongsProvider();
             const voiceChannel = message.member?.voice.channel;
             if (!voiceChannel) throw new CommandsCallError(message, 'Você não está em um canal de voz');
+            if (!message.guild) return;
 
-            const queue = bot.queue.get(message.guild!.id);
+            const queue = bot.queue.get(message.guild.id);
             if (queue && voiceChannel.id !== queue.connection.joinConfig.channelId) {
                 return message.reply('Você precisa estar no mesmo canal que o Bot').catch(console.error);
             }
 
-            const playlist = await Playlist.from(musics.toString(), musics.join(''), message.member);
+            const playlist = await Playlist.getPlaylist(musics.toString(), musics.join(''), message.member);
 
             if (queue) {
                 queue.songs.push(...playlist.videos);
@@ -45,7 +46,7 @@ const playlist: iCommand = {
                 })
             }, voiceChannel);
 
-            bot.queue.set(message.guild!.id, newQueue);
+            bot.queue.set(message.guild.id, newQueue);
             newQueue.enqueue(...playlist.videos);
 
             const queuedEmbed = songProvider.getPlaylistEmbedMessage(message, playlist);

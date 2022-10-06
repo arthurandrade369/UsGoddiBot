@@ -2,6 +2,8 @@ import { Song } from "@src/model/Song";
 import { EmbedBuilder, Message } from "discord.js";
 import { bot } from '@src/index';
 import { Playlist } from '@src/model/Playlist';
+import { Video } from "youtube-sr";
+import config from '@src/utils/config';
 
 export class SongsProvider {
     getSongEmbedMessage(message: Message, song: Song, discriminator: string): EmbedBuilder {
@@ -50,11 +52,32 @@ export class SongsProvider {
         playlistEmbed.addFields({ name: 'Pedido por:', value: `<@${message.author.id}>`, inline: true });
         playlistEmbed.addFields({ name: 'Tracks Adicionadas:', value: `${playlist.data.videoCount}`, inline: true });
 
-        playlistEmbed.setTitle(playlist.data.title!);
-        playlistEmbed.setURL(playlist.data.url!);
-        playlistEmbed.setThumbnail(playlist.data.thumbnail?.url!);
+        if (!playlist.data.title) throw new Error('Play');
+        if (!playlist.data.url) throw new Error('Error');
+        if (!playlist.data.thumbnail) throw new Error('Error');
+        if (!playlist.data.thumbnail.url) throw new Error('Error');
+        playlistEmbed.setTitle(playlist.data.title);
+        playlistEmbed.setURL(playlist.data.url);
+        playlistEmbed.setThumbnail(playlist.data.thumbnail.url);
 
         return playlistEmbed;
+    }
+
+    getSearchSongEmbedMessage(message: Message, videos: Video[]) {
+        const searchEmbed = new EmbedBuilder();
+        searchEmbed.setAuthor({
+            name: 'Escolha uma ou mais entre as musicas abaixo',
+            iconURL: config.bot.iconUrl,
+        });
+
+        videos.forEach((video, index) => {
+            if (!video.title) return;
+            searchEmbed.addFields({
+                name: `${index} -- ${video.title} - [${this.getDuration(video.duration.toString())}]`,
+                value: `${video.dislikes}`
+            })
+        })
+
     }
 
     getDuration(duration: string): string {
