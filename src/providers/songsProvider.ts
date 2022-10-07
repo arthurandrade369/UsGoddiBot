@@ -63,7 +63,7 @@ export class SongsProvider {
         return playlistEmbed;
     }
 
-    getSearchSongEmbedMessage(message: Message, videos: Video[]) {
+    getSearchSongEmbedMessage(message: Message, videos: Video[]): EmbedBuilder {
         const searchEmbed = new EmbedBuilder();
         searchEmbed.setAuthor({
             name: 'Escolha uma ou mais entre as musicas abaixo',
@@ -73,22 +73,24 @@ export class SongsProvider {
         videos.forEach((video, index) => {
             if (!video.title) return;
             searchEmbed.addFields({
-                name: `${index} -- ${video.title} - [${this.getDuration(video.duration.toString())}]`,
-                value: `${video.dislikes}`
+                name: `${++index}) ${video.title} - [${this.getDuration((video.duration / 1000).toString())}]`,
+                value: `${video.url}`
             })
         })
 
+        return searchEmbed;
     }
 
     getDuration(duration: string): string {
-        let minutes: number;
-        let seconds: number;
+        let minutes = Math.floor(parseInt(duration) / 60);
+        const seconds = parseInt(duration) - minutes * 60;
 
-
-        minutes = Math.floor(parseInt(duration) / 60);
-        seconds = parseInt(duration) - minutes * 60;
-
-        return `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+        if (minutes < 60) return `${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+        else {
+            const hours = Math.floor(minutes / 60);
+            minutes = minutes - hours * 60;
+            return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+        }
     }
 
     getQueuePosition(song: Song, message: Message): number {

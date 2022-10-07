@@ -4,7 +4,7 @@ import { createButtonComponent, getEmbed } from "@src/providers/embedProvider";
 import { Emojis } from "@src/providers/emojis";
 import { Groups } from "@src/providers/groups";
 import { SongsProvider } from "@src/providers/songsProvider";
-import { Message, EmbedBuilder, ButtonStyle, ActionRowBuilder, ButtonBuilder, ComponentType } from 'discord.js';
+import { Message, EmbedBuilder, ButtonStyle, ActionRowBuilder, ButtonBuilder, ComponentType, ButtonInteraction, CacheType } from 'discord.js';
 import { SongQueue } from '@src/model/SongQueue';
 
 const queue: iCommand = {
@@ -30,7 +30,8 @@ const queue: iCommand = {
             components: [buttons],
         });
 
-        const collector = embedQueue.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
+        const filter = (interaction: ButtonInteraction<CacheType>) => message.author.id === interaction.member?.user.id;
+        const collector = embedQueue.createMessageComponentCollector({ filter, componentType: ComponentType.Button, time: 60000 });
         collector.on('collect', (interected) => {
             if (interected.user.id !== message.author.id) {
                 interected.reply({

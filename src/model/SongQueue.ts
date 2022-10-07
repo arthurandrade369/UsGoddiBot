@@ -172,7 +172,7 @@ export class SongQueue {
 
         const playingMessage = await this.textChannel.send(embed);
 
-        const filter = (interaction: ButtonInteraction<CacheType>) => interaction.user.id !== this.textChannel.client.user!.id;
+        const filter = (interaction: ButtonInteraction<CacheType>) => interaction.user.id === song.member.user.id;
         const collector = playingMessage.createMessageComponentCollector({
             filter,
             componentType: ComponentType.Button,
